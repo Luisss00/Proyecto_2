@@ -2,10 +2,11 @@ from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.db.models import Q, Avg
 from .models import Category, Product, Review
 from .serializers import (
-    CategorySerializer, ProductListSerializer, 
+    CategorySerializer, ProductListSerializer,
     ProductDetailSerializer, ProductCreateUpdateSerializer,
     ReviewSerializer
 )
@@ -25,6 +26,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name', 'description']
     ordering_fields = ['price', 'created_at', 'views_count']
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     
     def get_serializer_class(self):
         if self.action == 'list':

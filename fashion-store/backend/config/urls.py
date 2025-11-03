@@ -41,5 +41,5 @@ urlpatterns = [
     path('api/orders/', include('apps.orders.urls')),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Always serve media files for this development setup
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

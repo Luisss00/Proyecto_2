@@ -15,9 +15,18 @@ class CategorySerializer(serializers.ModelSerializer):
         return obj.products.filter(is_active=True).count()
 
 class ProductImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = ProductImage
-        fields = ['id', 'image', 'is_primary', 'order']
+        fields = ['id', 'image', 'image_url', 'is_primary', 'order']
+        read_only_fields = ['id', 'image_url', 'is_primary', 'order']
+    
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if request and obj.image:
+            return request.build_absolute_uri(obj.image.url)
+        return obj.image.url if obj.image else None
 
 class ReviewSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -75,9 +84,50 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['name', 'slug', 'description', 'price', 'discount_price',
-                  'category', 'stock', 'available_sizes', 'colors', 
+                  'category', 'stock', 'available_sizes', 'colors',
                   'is_featured', 'is_active']
     
     def create(self, validated_data):
         validated_data['vendor'] = self.context['request'].user
-        return super().create(validated_data)
+        
+        # Crear el producto
+        product = super().create(validated_data)
+        
+        # Manejar imágenes desde request.FILES
+        request = self.context['request']
+        images = request.FILES.getlist('images', [])
+        
+        # Crear las imágenes asociadas
+        for i, image in enumerate(images):
+            ProductImage.objects.create(
+                product=product,
+                image=image,
+                is_primary=i == 0,  # Primera imagen como principal
+                order=i
+            )
+        
+        return product
+    
+    def update(self, instance, validated_data):
+        # Actualizar el producto
+        product = super().update(instance, validated_data)
+        
+        # Manejar imágenes desde request.FILES
+        request = self.context['request']
+        images = request.FILES.getlist('images', [])
+        
+        # Si hay nuevas imágenes, reemplazar las existentes
+        if images:
+            # Eliminar imágenes existentes
+            product.images.all().delete()
+            
+            # Crear nuevas imágenes
+            for i, image in enumerate(images):
+                ProductImage.objects.create(
+                    product=product,
+                    image=image,
+                    is_primary=i == 0,  # Primera imagen como principal
+                    order=i
+                )
+        
+        return product
