@@ -7,6 +7,21 @@ import { useAuth } from '../contexts/AuthContext';
 import { Search, Filter, X } from 'lucide-react';
 import { toast } from 'react-toastify';
 
+// Helper function to safely parse JSON arrays
+const safeParseArray = (value) => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -55,8 +70,16 @@ const Products = () => {
 
       const data = await productService.getAll(params);
       const products = Array.isArray(data) ? data : data.results || [];
-      setProducts(products);
-      console.log('Products loaded:', products.length);
+      
+      // Apply safeParseArray to all products to ensure available_sizes is always an array
+      const processedProducts = products.map(product => ({
+        ...product,
+        available_sizes: safeParseArray(product.available_sizes),
+        colors: safeParseArray(product.colors),
+      }));
+      
+      setProducts(processedProducts);
+      console.log('Products loaded:', processedProducts.length);
     } catch (error) {
       console.error('Error fetching products:', error);
       toast.error('Error al cargar los productos: ' + (error.message || 'Error desconocido'));

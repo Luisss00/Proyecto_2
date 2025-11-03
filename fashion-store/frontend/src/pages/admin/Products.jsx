@@ -82,15 +82,13 @@ const AdminProducts = () => {
           </p>
         </div>
 
-        <a
-          href="http://localhost:8000/admin/products/product/add/"
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          onClick={() => navigate('/admin/productos/create')}
           className="btn-primary flex items-center gap-2"
         >
           <Plus className="h-5 w-5" />
-          Nuevo Producto (Django Admin)
-        </a>
+          Nuevo Producto
+        </button>
       </div>
 
       {/* Filtros */}
@@ -148,7 +146,7 @@ const AdminProducts = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <img
-                          src={product.primary_image || 'https://via.placeholder.com/50'}
+                          src={product.primary_image || '/placeholder-image.png'}
                           alt={product.name}
                           className="h-12 w-12 rounded-lg object-cover"
                         />
@@ -206,15 +204,13 @@ const AdminProducts = () => {
                         >
                           <Eye className="h-5 w-5" />
                         </button>
-                        <a
-                          href={`http://localhost:8000/admin/products/product/${product.id}/change/`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={() => navigate(`/admin/productos/${product.id}/edit`)}
                           className="text-yellow-600 hover:text-yellow-900"
-                          title="Editar en Django Admin"
+                          title="Editar producto"
                         >
                           <Edit className="h-5 w-5" />
-                        </a>
+                        </button>
                         <button
                           onClick={() => handleDelete(product.id)}
                           className="text-red-600 hover:text-red-900"
@@ -235,16 +231,17 @@ const AdminProducts = () => {
       {/* Tip */}
       <div className="card bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
         <p className="text-sm text-blue-800 dark:text-blue-200">
-          💡 <strong>Tip:</strong> Para crear o editar productos con todas las opciones avanzadas,
-          usa el{' '}
+          💡 <strong>Tip:</strong> Puedes crear y editar productos directamente desde esta interfaz.
+          Los productos creados aquí estarán disponibles inmediatamente para los clientes.
+          Para funcionalidades avanzadas como subir imágenes, usa el{' '}
           <a
-            href="http://localhost:8000/admin/products/product/"
+            href="http://localhost:8000/admin/"
             target="_blank"
             rel="noopener noreferrer"
             className="underline font-semibold hover:text-blue-600"
           >
             Django Admin
-          </a>. Allí puedes subir imágenes, configurar tallas, colores y más.
+          </a>.
         </p>
       </div>
     </div>

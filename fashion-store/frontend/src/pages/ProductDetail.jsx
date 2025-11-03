@@ -6,6 +6,21 @@ import { useAuth } from '../contexts/AuthContext';
 import { ShoppingCart, Star, Package, ArrowLeft, Minus, Plus } from 'lucide-react';
 import { toast } from 'react-toastify';
 
+// Helper function to safely parse JSON arrays
+const safeParseArray = (value) => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -25,12 +40,20 @@ const ProductDetail = () => {
     try {
       setLoading(true);
       const data = await productService.getById(id);
-      setProduct(data);
-      if (data.available_sizes?.length > 0) {
-        setSelectedSize(data.available_sizes[0]);
+      
+      // Aplicar safeParseArray para tallas y colores
+      const processedData = {
+        ...data,
+        available_sizes: safeParseArray(data.available_sizes),
+        colors: safeParseArray(data.colors),
+      };
+      
+      setProduct(processedData);
+      if (processedData.available_sizes?.length > 0) {
+        setSelectedSize(processedData.available_sizes[0]);
       }
-      if (data.colors?.length > 0) {
-        setSelectedColor(data.colors[0]);
+      if (processedData.colors?.length > 0) {
+        setSelectedColor(processedData.colors[0]);
       }
     } catch (error) {
       console.error('Error fetching product:', error);
@@ -93,9 +116,9 @@ const ProductDetail = () => {
     );
   }
 
-  const images = product.images?.length > 0 
-    ? product.images 
-    : [{ image: 'https://via.placeholder.com/600x800?text=No+Image' }];
+  const images = product.images?.length > 0
+    ? product.images
+    : [{ image: '/placeholder-product.svg' }];
 
   return (
     <div className="min-h-screen py-8">

@@ -21,6 +21,7 @@ import Checkout from './pages/Checkout';
 // Páginas de admin
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminProducts from './pages/admin/Products';
+import ProductForm from './components/admin/ProductForm';
 import AdminUsers from './pages/admin/Users';
 import AdminOrders from './pages/admin/Orders';
 import AdminReports from './pages/admin/Reports';
@@ -80,6 +81,8 @@ function App() {
               <Route index element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="productos" element={<AdminProducts />} />
+              <Route path="productos/create" element={<ProductForm />} />
+              <Route path="productos/:id/edit" element={<ProductForm />} />
               <Route path="usuarios" element={<AdminUsers />} />
               <Route path="pedidos" element={<AdminOrders />} />
               <Route path="reportes" element={<AdminReports />} />

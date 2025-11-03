@@ -99,13 +99,25 @@ export const productService = {
   },
   
   create: async (data) => {
-    const response = await api.post('/products/products/', data);
-    return response.data;
+    // Si es FormData, no establecer headers manualmente
+    if (data instanceof FormData) {
+      const response = await api.post('/products/products/', data);
+      return response.data;
+    } else {
+      const response = await api.post('/products/products/', data);
+      return response.data;
+    }
   },
   
   update: async (id, data) => {
-    const response = await api.patch(`/products/products/${id}/`, data);
-    return response.data;
+    // Si es FormData, no establecer headers manualmente
+    if (data instanceof FormData) {
+      const response = await api.patch(`/products/products/${id}/`, data);
+      return response.data;
+    } else {
+      const response = await api.patch(`/products/products/${id}/`, data);
+      return response.data;
+    }
   },
   
   delete: async (id) => {
