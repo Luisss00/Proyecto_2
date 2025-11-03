@@ -1,0 +1,43 @@
+🚀 COMANDOS PARA EJECUTAR EL SISTEMA COMPLETO:
+1. Backend (en terminal separado):
+cd fashion-store/backend && python manage.py runserver
+2. Frontend (en terminal separado):
+cd fashion-store/frontend && npm run dev
+
+-- Conectar a PostgreSQL
+psql -U fashion_user -d fashion_store
+
+-- Ver usuarios
+SELECT id, username, email, role, first_name, last_name FROM users;
+
+-- Ver categorías
+SELECT id, name, slug, is_active FROM categories;
+
+-- Ver productos
+SELECT id, name, price, discount_price, stock, category_id FROM products;
+
+-- Salir
+\q
+
+
+# Desde aquí puedes:
+
+Ver las tablas actuales:
+
+\dt
+
+
+Ver las bases de datos disponibles:
+
+\l
+
+
+Salir del cliente psql:
+
+\q
+
+
+Ver los usuarios existentes:
+
+\du
+
