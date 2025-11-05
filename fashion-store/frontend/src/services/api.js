@@ -140,6 +140,21 @@ export const productService = {
     const response = await api.post(`/products/products/${productId}/add_review/`, reviewData);
     return response.data;
   },
+
+  getVendorStatistics: async () => {
+    const response = await api.get('/products/products/vendor_statistics/');
+    return response.data;
+  },
+  
+  getLowStock: async () => {
+    const response = await api.get('/products/products/low_stock/');
+    return response.data;
+  },
+
+   getVendorStatistics: async () => {
+    const response = await api.get('/products/products/vendor_statistics/');
+    return response.data;
+  },
 };
 
 // ==================== CATEGORY SERVICES ====================
@@ -226,6 +241,11 @@ export const orderService = {
     const response = await api.get('/orders/my_orders/');
     return response.data;
   },
+
+  getVendorOrders: async () => {
+    const response = await api.get('/orders/vendor_orders/');
+    return response.data;
+  },
 };
 
 // ==================== USER SERVICES ====================
@@ -257,3 +277,4 @@ export const userService = {
 };
 
 export default api;
+

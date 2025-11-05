@@ -1,62 +1,97 @@
 from rest_framework import serializers
 from .models import Order, OrderItem
 from apps.products.serializers import ProductListSerializer
-import uuid
+from apps.users.serializers import UserSerializer
+
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    """Serializer para items de orden"""
     product = ProductListSerializer(read_only=True)
+    product_id = serializers.IntegerField(write_only=True)
+    subtotal = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
     
     class Meta:
         model = OrderItem
-        fields = ['id', 'product', 'quantity', 'size', 'color', 
-                  'price', 'subtotal']
+        fields = [
+            'id', 'product', 'product_id', 'quantity', 
+            'size', 'color', 'price', 'subtotal'
+        ]
+        read_only_fields = ['id', 'price', 'subtotal']
+
 
 class OrderSerializer(serializers.ModelSerializer):
+    """Serializer básico para lista de órdenes"""
+    user = UserSerializer(read_only=True)
+    items_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Order
+        fields = [
+            'id', 'order_number', 'user', 'status', 'payment_method',
+            'is_paid', 'total', 'items_count', 'created_at'
+        ]
+        read_only_fields = ['id', 'order_number', 'created_at']
+    
+    def get_items_count(self, obj):
+        return obj.items.count()
+
+
+class OrderDetailSerializer(serializers.ModelSerializer):
+    """Serializer detallado para orden individual"""
+    user = UserSerializer(read_only=True)
     items = OrderItemSerializer(many=True, read_only=True)
     
     class Meta:
         model = Order
-        fields = ['id', 'order_number', 'status', 'payment_method', 
-                  'is_paid', 'shipping_address', 'shipping_city', 
-                  'shipping_phone', 'shipping_cost', 'subtotal', 
-                  'tax', 'total', 'items', 'notes', 'created_at']
-        read_only_fields = ['id', 'order_number', 'created_at']
+        fields = [
+            'id', 'order_number', 'user', 'status', 'payment_method',
+            'payment_id', 'is_paid', 'shipping_address', 'shipping_city',
+            'shipping_phone', 'shipping_cost', 'subtotal', 'tax', 'total',
+            'notes', 'items', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'order_number', 'created_at', 'updated_at']
+
 
 class OrderCreateSerializer(serializers.ModelSerializer):
+    """Serializer para crear órdenes"""
+    items = OrderItemSerializer(many=True)
+    
     class Meta:
         model = Order
-        fields = ['payment_method', 'shipping_address', 'shipping_city',
-                  'shipping_phone', 'notes']
+        fields = [
+            'payment_method', 'shipping_address', 'shipping_city',
+            'shipping_phone', 'notes', 'items'
+        ]
     
     def create(self, validated_data):
-        user = self.context['request'].user
-        cart = user.cart
+        items_data = validated_data.pop('items')
         
-        if not cart.items.exists():
-            raise serializers.ValidationError("El carrito está vacío")
+        # Crear la orden
+        order = Order.objects.create(
+            user=self.context['request'].user,
+            **validated_data
+        )
         
-        validated_data['order_number'] = f"ORD-{uuid.uuid4().hex[:8].upper()}"
-        validated_data['user'] = user
-        validated_data['subtotal'] = cart.total
-        validated_data['tax'] = cart.total * 0.19
-        validated_data['shipping_cost'] = 15000
-        validated_data['total'] = validated_data['subtotal'] + validated_data['tax'] + validated_data['shipping_cost']
+        # Crear los items de la orden
+        from apps.products.models import Product
         
-        order = Order.objects.create(**validated_data)
-        
-        for cart_item in cart.items.all():
+        for item_data in items_data:
+            product = Product.objects.get(id=item_data['product_id'])
+            
             OrderItem.objects.create(
                 order=order,
-                product=cart_item.product,
-                quantity=cart_item.quantity,
-                size=cart_item.size,
-                color=cart_item.color,
-                price=cart_item.product.final_price
+                product=product,
+                quantity=item_data['quantity'],
+                size=item_data.get('size', ''),
+                color=item_data.get('color', ''),
+                price=product.final_price
             )
             
-            cart_item.product.stock -= cart_item.quantity
-            cart_item.product.save()
+            # Reducir stock
+            product.stock -= item_data['quantity']
+            product.save()
         
-        cart.items.all().delete()
+        # Calcular totales
+        order.calculate_totals()
         
-        return order
+        return order    
