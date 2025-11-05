@@ -2,39 +2,54 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Sum, Count
-from django.db.models.functions import TruncDate
+from django.db.models import Q, Sum, Count
 from .models import Order, OrderItem
-from .serializers import OrderSerializer, OrderCreateSerializer
-from apps.users.permissions import IsAdministrador
+from .serializers import (
+    OrderSerializer, 
+    OrderDetailSerializer, 
+    OrderCreateSerializer
+)
+
 
 class OrderViewSet(viewsets.ModelViewSet):
-    serializer_class = OrderSerializer
+    """ViewSet para gestión de órdenes"""
+    queryset = Order.objects.all().select_related('user').prefetch_related('items__product')
     permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        user = self.request.user
-        if user.role == 'administrador':
-            return Order.objects.all()
-        elif user.role == 'vendedor':
-            return Order.objects.filter(items__product__vendor=user).distinct()
-        return Order.objects.filter(user=user)
     
     def get_serializer_class(self):
         if self.action == 'create':
             return OrderCreateSerializer
+        elif self.action == 'retrieve':
+            return OrderDetailSerializer
         return OrderSerializer
     
-    @action(detail=True, methods=['post'])
+    def get_queryset(self):
+        user = self.request.user
+        
+        if user.role == 'administrador':
+            return Order.objects.all()
+        elif user.role == 'vendedor':
+            # Vendedor ve pedidos que contienen sus productos
+            return Order.objects.filter(
+                items__product__vendor=user
+            ).distinct()
+        else:
+            # Cliente solo ve sus propios pedidos
+            return Order.objects.filter(user=user)
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+    
+    @action(detail=True, methods=['patch'])
     def update_status(self, request, pk=None):
         order = self.get_object()
         new_status = request.data.get('status')
         
         if new_status not in dict(Order.STATUS_CHOICES):
-            return Response({'error': 'Estado inválido'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        if request.user.role != 'administrador':
-            return Response({'error': 'No tienes permisos'}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {'error': 'Estado inválido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         order.status = new_status
         order.save()
@@ -42,47 +57,65 @@ class OrderViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(order)
         return Response(serializer.data)
     
-    @action(detail=True, methods=['post'])
-    def process_payment(self, request, pk=None):
-        order = self.get_object()
-        payment_method = order.payment_method
-        
-        if payment_method == 'contra_entrega':
-            order.status = 'confirmado'
-            order.save()
-            return Response(OrderSerializer(order).data)
-        
-        return Response({'error': 'Método de pago no soportado'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    @action(detail=False, methods=['get'], permission_classes=[IsAdministrador])
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def statistics(self, request):
-        from datetime import timedelta
-        from django.utils import timezone
+        """Estadísticas generales de pedidos (solo admin)"""
+        if request.user.role != 'administrador':
+            return Response(
+                {'error': 'Solo administradores pueden acceder'},
+                status=status.HTTP_403_FORBIDDEN
+            )
         
-        total_orders = Order.objects.count()
-        total_revenue = Order.objects.filter(is_paid=True).aggregate(Sum('total'))['total__sum'] or 0
-        pending_orders = Order.objects.filter(status='pendiente').count()
+        stats = Order.objects.aggregate(
+            total_orders=Count('id'),
+            total_revenue=Sum('total'),
+            pending=Count('id', filter=Q(status='pendiente')),
+            confirmed=Count('id', filter=Q(status='confirmado')),
+            delivered=Count('id', filter=Q(status='entregado')),
+        )
         
-        seven_days_ago = timezone.now() - timedelta(days=7)
-        orders_by_day = Order.objects.filter(
-            created_at__gte=seven_days_ago
-        ).annotate(
-            date=TruncDate('created_at')
-        ).values('date').annotate(
-            count=Count('id'),
-            revenue=Sum('total')
-        ).order_by('date')
-        
-        top_products = OrderItem.objects.values(
+        # Top productos vendidos
+        top_products = OrderItem.objects.filter(
+            order__status='entregado'
+        ).values(
             'product__name'
         ).annotate(
             total_sold=Sum('quantity')
         ).order_by('-total_sold')[:5]
         
+        # Ventas por día (últimos 7 días)
+        from datetime import datetime, timedelta
+        from django.db.models.functions import TruncDate
+        
+        seven_days_ago = datetime.now() - timedelta(days=7)
+        orders_by_day = Order.objects.filter(
+            created_at__gte=seven_days_ago
+        ).annotate(
+            date=TruncDate('created_at')
+        ).values('date').annotate(
+            revenue=Sum('total'),
+            count=Count('id')
+        ).order_by('date')
+        
         return Response({
-            'total_orders': total_orders,
-            'total_revenue': float(total_revenue),
-            'pending_orders': pending_orders,
-            'orders_by_day': list(orders_by_day),
+            **stats,
             'top_products': list(top_products),
+            'orders_by_day': list(orders_by_day),
         })
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def vendor_orders(self, request):
+        """Pedidos que contienen productos del vendedor"""
+        if request.user.role not in ['vendedor', 'administrador']:
+            return Response(
+                {'error': 'Solo vendedores pueden acceder'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Obtener pedidos que contienen productos del vendedor
+        orders = Order.objects.filter(
+            items__product__vendor=request.user
+        ).distinct().select_related('user').prefetch_related('items__product')
+        
+        serializer = OrderSerializer(orders, many=True, context={'request': request})
+        return Response(serializer.data)
