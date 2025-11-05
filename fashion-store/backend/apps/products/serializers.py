@@ -81,13 +81,18 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         return obj.reviews.count()
 
 class ProductCreateUpdateSerializer(serializers.ModelSerializer):
+    """Serializer para crear/actualizar productos"""
+    
     class Meta:
         model = Product
-        fields = ['name', 'slug', 'description', 'price', 'discount_price',
-                  'category', 'stock', 'available_sizes', 'colors',
-                  'is_featured', 'is_active']
+        fields = [
+            'name', 'slug', 'description', 'price', 'discount_price',
+            'category', 'stock', 'available_sizes', 'colors',
+            'is_featured', 'is_active'
+        ]
     
     def create(self, validated_data):
+        """Crear producto con el usuario actual como vendedor"""
         validated_data['vendor'] = self.context['request'].user
         
         # Crear el producto
@@ -97,18 +102,19 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
         request = self.context['request']
         images = request.FILES.getlist('images', [])
         
-        # Crear las imágenes asociadas
+        # IMPORTANTE: Crear las imágenes asociadas
         for i, image in enumerate(images):
             ProductImage.objects.create(
                 product=product,
                 image=image,
-                is_primary=i == 0,  # Primera imagen como principal
+                is_primary=(i == 0),  # ✅ Primera imagen como principal
                 order=i
             )
         
         return product
     
     def update(self, instance, validated_data):
+        """Actualizar producto"""
         # Actualizar el producto
         product = super().update(instance, validated_data)
         
@@ -116,18 +122,18 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
         request = self.context['request']
         images = request.FILES.getlist('images', [])
         
-        # Si hay nuevas imágenes, reemplazar las existentes
+        # Si hay nuevas imágenes
         if images:
-            # Eliminar imágenes existentes
-            product.images.all().delete()
+            # NO eliminar las imágenes existentes, solo agregar nuevas
+            existing_count = product.images.count()
             
             # Crear nuevas imágenes
             for i, image in enumerate(images):
                 ProductImage.objects.create(
                     product=product,
                     image=image,
-                    is_primary=i == 0,  # Primera imagen como principal
-                    order=i
+                    is_primary=(existing_count == 0 and i == 0),  # ✅ Solo si no hay imágenes previas
+                    order=existing_count + i
                 )
         
         return product

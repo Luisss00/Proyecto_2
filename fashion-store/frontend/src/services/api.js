@@ -16,6 +16,12 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Si es FormData, dejar que axios establezca el Content-Type automáticamente
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+    
     return config;
   },
   (error) => Promise.reject(error)
@@ -44,6 +50,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }
@@ -53,7 +60,7 @@ api.interceptors.response.use(
   }
 );
 
-// Auth Services
+// ==================== AUTH SERVICES ====================
 export const authService = {
   login: async (credentials) => {
     const response = await api.post('/auth/login/', credentials);
@@ -74,9 +81,15 @@ export const authService = {
     const response = await api.patch('/users/profile/', data);
     return response.data;
   },
+  
+  logout: () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+  },
 };
 
-// Product Services
+// ==================== PRODUCT SERVICES ====================
 export const productService = {
   getAll: async (params = {}) => {
     const response = await api.get('/products/products/', { params });
@@ -98,26 +111,19 @@ export const productService = {
     return response.data;
   },
   
+  getLatest: async () => {
+    const response = await api.get('/products/products/latest/');
+    return response.data;
+  },
+  
   create: async (data) => {
-    // Si es FormData, no establecer headers manualmente
-    if (data instanceof FormData) {
-      const response = await api.post('/products/products/', data);
-      return response.data;
-    } else {
-      const response = await api.post('/products/products/', data);
-      return response.data;
-    }
+    const response = await api.post('/products/products/', data);
+    return response.data;
   },
   
   update: async (id, data) => {
-    // Si es FormData, no establecer headers manualmente
-    if (data instanceof FormData) {
-      const response = await api.patch(`/products/products/${id}/`, data);
-      return response.data;
-    } else {
-      const response = await api.patch(`/products/products/${id}/`, data);
-      return response.data;
-    }
+    const response = await api.patch(`/products/products/${id}/`, data);
+    return response.data;
   },
   
   delete: async (id) => {
@@ -129,17 +135,32 @@ export const productService = {
     const response = await api.get('/products/products/my_products/');
     return response.data;
   },
+  
+  addReview: async (productId, reviewData) => {
+    const response = await api.post(`/products/products/${productId}/add_review/`, reviewData);
+    return response.data;
+  },
 };
 
-// Category Services
+// ==================== CATEGORY SERVICES ====================
 export const categoryService = {
   getAll: async () => {
     const response = await api.get('/products/categories/');
     return response.data;
   },
+  
+  getById: async (id) => {
+    const response = await api.get(`/products/categories/${id}/`);
+    return response.data;
+  },
+  
+  getBySlug: async (slug) => {
+    const response = await api.get(`/products/categories/${slug}/`);
+    return response.data;
+  },
 };
 
-// Cart Services
+// ==================== CART SERVICES ====================
 export const cartService = {
   get: async () => {
     const response = await api.get('/cart/');
@@ -157,7 +178,9 @@ export const cartService = {
   },
   
   removeItem: async (cartItemId) => {
-    const response = await api.delete('/cart/remove_item/', { data: { cart_item_id: cartItemId } });
+    const response = await api.delete('/cart/remove_item/', { 
+      data: { cart_item_id: cartItemId } 
+    });
     return response.data;
   },
   
@@ -167,10 +190,10 @@ export const cartService = {
   },
 };
 
-// Order Services
+// ==================== ORDER SERVICES ====================
 export const orderService = {
-  getAll: async () => {
-    const response = await api.get('/orders/');
+  getAll: async (params = {}) => {
+    const response = await api.get('/orders/', { params });
     return response.data;
   },
   
@@ -185,12 +208,50 @@ export const orderService = {
   },
   
   updateStatus: async (orderId, status) => {
-    const response = await api.post(`/orders/${orderId}/update_status/`, { status });
+    const response = await api.patch(`/orders/${orderId}/update_status/`, { status });
+    return response.data;
+  },
+  
+  cancel: async (orderId) => {
+    const response = await api.post(`/orders/${orderId}/cancel/`);
     return response.data;
   },
   
   getStatistics: async () => {
     const response = await api.get('/orders/statistics/');
+    return response.data;
+  },
+  
+  getMyOrders: async () => {
+    const response = await api.get('/orders/my_orders/');
+    return response.data;
+  },
+};
+
+// ==================== USER SERVICES ====================
+export const userService = {
+  getAll: async (params = {}) => {
+    const response = await api.get('/users/', { params });
+    return response.data;
+  },
+  
+  getById: async (id) => {
+    const response = await api.get(`/users/${id}/`);
+    return response.data;
+  },
+  
+  update: async (id, data) => {
+    const response = await api.patch(`/users/${id}/`, data);
+    return response.data;
+  },
+  
+  delete: async (id) => {
+    const response = await api.delete(`/users/${id}/`);
+    return response.data;
+  },
+  
+  changePassword: async (data) => {
+    const response = await api.post('/users/change_password/', data);
     return response.data;
   },
 };
