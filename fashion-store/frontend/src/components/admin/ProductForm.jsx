@@ -3,11 +3,19 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { productService, categoryService } from '../../services/api';
 import { Save, Upload, X, Plus, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../contexts/AuthContext';
 
 const ProductForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { user } = useAuth();
   const isEdit = Boolean(id);
+
+  // Determinar ruta de productos según el rol del usuario
+  const getProductsRoute = () => {
+    if (user?.role === 'vendedor') return '/vendedor/productos';
+    return '/admin/productos';
+  };
 
   const [formData, setFormData] = useState({
     name: '',
@@ -90,7 +98,7 @@ const ProductForm = () => {
     } catch (error) {
       console.error('Error fetching product:', error);
       toast.error('Error al cargar el producto');
-      navigate('/admin/productos');
+      navigate(getProductsRoute());
     } finally {
       setLoading(false);
     }
@@ -271,8 +279,8 @@ const ProductForm = () => {
         await productService.create(submitData);
         toast.success('Producto creado exitosamente');
       }
-      
-      navigate('/admin/productos');
+
+      navigate(getProductsRoute());
     } catch (error) {
       console.error('Error saving product:', error);
       let errorMessage = 'Error al guardar el producto';
@@ -327,7 +335,7 @@ const ProductForm = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate('/admin/productos')}
+          onClick={() => navigate(getProductsRoute())}
           className="btn-secondary flex items-center gap-2"
         >
           <X className="h-4 w-4" />
@@ -703,7 +711,7 @@ const ProductForm = () => {
         <div className="flex justify-end space-x-4">
           <button
             type="button"
-            onClick={() => navigate('/admin/productos')}
+            onClick={() => navigate(getProductsRoute())}
             className="btn-secondary"
           >
             Cancelar

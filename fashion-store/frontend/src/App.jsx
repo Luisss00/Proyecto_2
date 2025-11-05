@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import AdminLayout from './components/admin/AdminLayout';
+import VendorLayout from './components/vendor/VendorLayout';
 
 // Páginas públicas
 import Home from './pages/Home';
@@ -26,6 +27,12 @@ import AdminUsers from './pages/admin/Users';
 import AdminOrders from './pages/admin/Orders';
 import AdminReports from './pages/admin/Reports';
 import AdminSettings from './pages/admin/Settings';
+
+// Páginas de vendedor
+import VendorProducts from './pages/vendor/VendorProducts';
+import VendorOrders from './pages/vendor/VendorOrders';
+import VendorStats from './pages/vendor/VendorStats';
+import VendorLowStock from './pages/vendor/VendorLowStock';
 
 function App() {
   return (
@@ -87,6 +94,23 @@ function App() {
               <Route path="pedidos" element={<AdminOrders />} />
               <Route path="reportes" element={<AdminReports />} />
               <Route path="configuracion" element={<AdminSettings />} />
+            </Route>
+
+            <Route
+              path="/vendedor/*"
+              element={
+                <ProtectedRoute allowedRoles={['vendedor']}>
+                  <VendorLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="/vendedor/productos" replace />} />
+              <Route path="productos" element={<VendorProducts />} />
+              <Route path="productos/create" element={<ProductForm />} />
+              <Route path="productos/:id/edit" element={<ProductForm />} />
+              <Route path="pedidos" element={<VendorOrders />} />
+              <Route path="estadisticas" element={<VendorStats />} />
+              <Route path="stock-bajo" element={<VendorLowStock />} />
             </Route>
           </Routes>
 
