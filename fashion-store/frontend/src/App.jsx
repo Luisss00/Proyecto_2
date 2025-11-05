@@ -6,7 +6,10 @@ import { CartProvider } from './contexts/CartContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+
+// Layouts
 import AdminLayout from './components/admin/AdminLayout';
+import VendorLayout from './components/vendor/VendorLayout';
 
 // Páginas públicas
 import Home from './pages/Home';
@@ -21,11 +24,18 @@ import Checkout from './pages/Checkout';
 // Páginas de admin
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminProducts from './pages/admin/Products';
-import ProductForm from './components/admin/ProductForm';
 import AdminUsers from './pages/admin/Users';
 import AdminOrders from './pages/admin/Orders';
 import AdminReports from './pages/admin/Reports';
 import AdminSettings from './pages/admin/Settings';
+import ProductForm from './components/admin/ProductForm';
+
+// Páginas de vendedor
+import VendorDashboard from './pages/vendor/Dashboard';
+import VendorProducts from './pages/vendor/Products';
+import VendorOrders from './pages/vendor/Orders';
+import VendorStatistics from './pages/vendor/Statistics';
+import VendorProfile from './pages/vendor/Profile';
 
 function App() {
   return (
@@ -33,6 +43,7 @@ function App() {
       <AuthProvider>
         <CartProvider>
           <Routes>
+            {/* ==================== RUTAS PÚBLICAS ==================== */}
             <Route
               path="/*"
               element={
@@ -40,16 +51,19 @@ function App() {
                   <Navbar />
                   <main className="flex-grow">
                     <Routes>
+                      {/* Páginas principales */}
                       <Route path="/" element={<Home />} />
                       <Route path="/login" element={<Login />} />
                       <Route path="/register" element={<Register />} />
                       <Route path="/productos" element={<Products />} />
                       <Route path="/producto/:id" element={<ProductDetail />} />
                       <Route path="/ofertas" element={<Offers />} />
+
+                      {/* Rutas protegidas para clientes */}
                       <Route
                         path="/carrito"
                         element={
-                          <ProtectedRoute allowedRoles={['cliente']}>
+                          <ProtectedRoute allowedRoles={['cliente', 'vendedor', 'administrador']}>
                             <Cart />
                           </ProtectedRoute>
                         }
@@ -57,11 +71,13 @@ function App() {
                       <Route
                         path="/checkout"
                         element={
-                          <ProtectedRoute allowedRoles={['cliente']}>
+                          <ProtectedRoute allowedRoles={['cliente', 'vendedor', 'administrador']}>
                             <Checkout />
                           </ProtectedRoute>
                         }
                       />
+
+                      {/* 404 */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </main>
@@ -70,6 +86,7 @@ function App() {
               }
             />
 
+            {/* ==================== RUTAS DE ADMINISTRADOR ==================== */}
             <Route
               path="/admin/*"
               element={
@@ -82,20 +99,41 @@ function App() {
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="productos" element={<AdminProducts />} />
               <Route path="productos/create" element={<ProductForm />} />
-              <Route path="productos/:id/edit" element={<ProductForm />} />
+              <Route path="productos/edit/:id" element={<ProductForm />} />
               <Route path="usuarios" element={<AdminUsers />} />
               <Route path="pedidos" element={<AdminOrders />} />
               <Route path="reportes" element={<AdminReports />} />
               <Route path="configuracion" element={<AdminSettings />} />
             </Route>
+
+            {/* ==================== RUTAS DE VENDEDOR ==================== */}
+            <Route
+              path="/vendedor/*"
+              element={
+                <ProtectedRoute allowedRoles={['vendedor', 'administrador']}>
+                  <VendorLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="/vendedor/dashboard" replace />} />
+              <Route path="dashboard" element={<VendorDashboard />} />
+              <Route path="productos" element={<VendorProducts />} />
+              <Route path="productos/nuevo" element={<ProductForm />} />
+              <Route path="productos/editar/:id" element={<ProductForm />} />
+              <Route path="pedidos" element={<VendorOrders />} />
+              <Route path="estadisticas" element={<VendorStatistics />} />
+              <Route path="perfil" element={<VendorProfile />} />
+            </Route>
           </Routes>
 
+          {/* Toast Notifications */}
           <ToastContainer
             position="top-right"
             autoClose={3000}
             hideProgressBar={false}
             newestOnTop
             closeOnClick
+            rtl={false}
             pauseOnFocusLoss
             draggable
             pauseOnHover
@@ -107,12 +145,33 @@ function App() {
   );
 }
 
+// ==================== COMPONENTE 404 ====================
 const NotFound = () => (
-  <div className="min-h-screen flex items-center justify-center">
+  <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
     <div className="text-center">
-      <h1 className="text-6xl font-bold mb-4">404</h1>
-      <p className="text-xl text-gray-600 mb-8">Página no encontrada</p>
-      <a href="/" className="btn-primary">Volver al Inicio</a>
+      <h1 className="text-9xl font-bold text-gray-900 dark:text-white mb-4">404</h1>
+      <p className="text-2xl text-gray-600 dark:text-gray-400 mb-8">
+        Página no encontrada
+      </p>
+      <p className="text-gray-500 dark:text-gray-500 mb-8">
+        La página que buscas no existe o fue movida.
+      </p>
+      <a href="/" className="btn-primary inline-flex items-center gap-2">
+        <svg
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+        Volver al Inicio
+      </a>
     </div>
   </div>
 );

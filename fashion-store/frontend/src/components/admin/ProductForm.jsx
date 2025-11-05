@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { productService, categoryService } from '../../services/api';
 import { Save, Upload, X, Plus, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../contexts/AuthContext';
 
 const ProductForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
   const { id } = useParams();
   const isEdit = Boolean(id);
 
@@ -272,7 +275,9 @@ const ProductForm = () => {
         toast.success('Producto creado exitosamente');
       }
       
-      navigate('/admin/productos');
+      // Determinar la ruta de redirección basada en el rol del usuario
+      const redirectPath = user?.role === 'vendedor' ? '/vendedor/productos' : '/admin/productos';
+      navigate(redirectPath);
     } catch (error) {
       console.error('Error saving product:', error);
       let errorMessage = 'Error al guardar el producto';
@@ -327,7 +332,7 @@ const ProductForm = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate('/admin/productos')}
+          onClick={() => navigate(user?.role === 'vendedor' ? '/vendedor/productos' : '/admin/productos')}
           className="btn-secondary flex items-center gap-2"
         >
           <X className="h-4 w-4" />
@@ -703,7 +708,7 @@ const ProductForm = () => {
         <div className="flex justify-end space-x-4">
           <button
             type="button"
-            onClick={() => navigate('/admin/productos')}
+            onClick={() => navigate(user?.role === 'vendedor' ? '/vendedor/productos' : '/admin/productos')}
             className="btn-secondary"
           >
             Cancelar

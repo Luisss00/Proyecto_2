@@ -25,6 +25,7 @@ const Login = () => {
 
     try {
       const user = await login(formData);
+      console.log('🔍 Usuario logueado:', user);
       
       // Redirigir según el rol
       if (user.role === 'administrador') {

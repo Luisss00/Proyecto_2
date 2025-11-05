@@ -146,6 +146,11 @@ export const productService = {
     return response.data;
   },
   
+  getMyProducts: async () => {
+    const response = await api.get('/products/products/my_products/');
+    return response.data;
+  },
+
   getLowStock: async () => {
     const response = await api.get('/products/products/low_stock/');
     return response.data;
@@ -239,6 +244,11 @@ export const orderService = {
   
   getMyOrders: async () => {
     const response = await api.get('/orders/my_orders/');
+    return response.data;
+  },
+
+  getVendorOrders: async () => {
+    const response = await api.get('/orders/vendor_orders/');
     return response.data;
   },
 
