@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../../services/api';
+import { userService } from '../../services/api';
 import { Search, Shield, UserCheck, UserX, ExternalLink } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -16,8 +16,8 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/users/');
-      setUsers(Array.isArray(response.data) ? response.data : []);
+      const response = await userService.getAll();
+      setUsers(Array.isArray(response) ? response : []);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Error al cargar usuarios');

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { orderService } from '../../services/api';
+import { orderService, userService } from '../../services/api';
 import StatCard from '../../components/admin/StatCard';
 import { DollarSign, ShoppingBag, Users, Package, TrendingUp } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -14,8 +14,18 @@ const AdminDashboard = () => {
 
   const fetchStatistics = async () => {
     try {
-      const data = await orderService.getStatistics();
-      setStats(data);
+      const [ordersData, usersData] = await Promise.all([
+        orderService.getStatistics(),
+        userService.getStatistics().catch(() => ({ total_users: 0 })) // Fallback si falla
+      ]);
+      
+      // Combinar datos de órdenes con datos de usuarios
+      const combinedData = {
+        ...ordersData,
+        total_users: usersData.total_users || 0,
+      };
+      
+      setStats(combinedData);
     } catch (error) {
       console.error('Error fetching statistics:', error);
       toast.error('Error al cargar estadísticas');
@@ -76,7 +86,7 @@ const AdminDashboard = () => {
         />
         <StatCard
           title="Usuarios Activos"
-          value="156"
+          value={stats?.total_users || 0}
           icon={Users}
           color="purple"
           trend="up"

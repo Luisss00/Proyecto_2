@@ -146,21 +146,8 @@ export const productService = {
     return response.data;
   },
   
-<<<<<<< HEAD
-  getMyProducts: async () => {
-    const response = await api.get('/products/products/my_products/');
-    return response.data;
-  },
-
-=======
->>>>>>> b319bae63bfe01da1914287b0f5f359cb0a76b9e
   getLowStock: async () => {
     const response = await api.get('/products/products/low_stock/');
-    return response.data;
-  },
-
-   getVendorStatistics: async () => {
-    const response = await api.get('/products/products/vendor_statistics/');
     return response.data;
   },
 };
@@ -254,21 +241,14 @@ export const orderService = {
     const response = await api.get('/orders/vendor_orders/');
     return response.data;
   },
-<<<<<<< HEAD
-
-  getVendorOrders: async () => {
-    const response = await api.get('/orders/vendor_orders/');
-    return response.data;
-  },
-=======
->>>>>>> b319bae63bfe01da1914287b0f5f359cb0a76b9e
 };
 
 // ==================== USER SERVICES ====================
 export const userService = {
   getAll: async (params = {}) => {
     const response = await api.get('/users/', { params });
-    return response.data;
+    // Extraer array de usuarios de la respuesta paginada
+    return response.data.results || response.data;
   },
   
   getById: async (id) => {
@@ -290,7 +270,11 @@ export const userService = {
     const response = await api.post('/users/change_password/', data);
     return response.data;
   },
+
+  getStatistics: async () => {
+    const response = await api.get('/users/statistics/');
+    return response.data;
+  },
 };
 
 export default api;
-

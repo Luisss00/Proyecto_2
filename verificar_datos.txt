@@ -1,43 +1,58 @@
-🚀 COMANDOS PARA EJECUTAR EL SISTEMA COMPLETO:
-1. Backend (en terminal separado):
-cd fashion-store/backend && python manage.py runserver
-2. Frontend (en terminal separado):
-cd fashion-store/frontend && npm run dev
+# SCRIPT DE DIAGNOSTICO DEL FRONTEND
 
--- Conectar a PostgreSQL
-psql -U fashion_user -d fashion_store
+Para diagnosticar el problema del panel de admin, ve a:
 
--- Ver usuarios
-SELECT id, username, email, role, first_name, last_name FROM users;
+1. Abre http://localhost:3000/admin/usuarios en el navegador
+2. Abre la consola del desarrollador (F12)
+3. Ve a la pestaña "Console" y pega este código:
 
--- Ver categorías
-SELECT id, name, slug, is_active FROM categories;
+```javascript
+// Verificar autenticación
+const token = localStorage.getItem('access_token');
+const user = localStorage.getItem('user');
+console.log('Token existe:', !!token);
+console.log('Usuario:', user);
 
--- Ver productos
-SELECT id, name, price, discount_price, stock, category_id FROM products;
+// Hacer llamada directa a la API
+fetch('/api/users/', {
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  }
+})
+.then(response => {
+  console.log('Status de la respuesta:', response.status);
+  console.log('Headers de la respuesta:', [...response.headers.entries()]);
+  return response.json();
+})
+.then(data => {
+  console.log('=== DATOS RECIBIDOS ===');
+  console.log('Total usuarios:', Array.isArray(data) ? data.length : 'No es array');
+  console.log('Datos:', data);
+  
+  if (Array.isArray(data)) {
+    console.log('=== CONTEO POR ROL ===');
+    const admins = data.filter(u => u.role === 'administrador');
+    const vendedores = data.filter(u => u.role === 'vendedor');
+    const clientes = data.filter(u => u.role === 'cliente');
+    
+    console.log('Administradores:', admins.length, admins);
+    console.log('Vendedores:', vendedores.length, vendedores);
+    console.log('Clientes:', clientes.length, clientes);
+    
+    // Verificar estructura de datos
+    console.log('=== ESTRUCTURA DEL PRIMER USUARIO ===');
+    if (data.length > 0) {
+      console.log('Primer usuario:', data[0]);
+      console.log('Propiedades disponibles:', Object.keys(data[0]));
+    }
+  }
+})
+.catch(error => {
+  console.error('Error en la llamada:', error);
+});
+```
 
--- Salir
-\q
+4. Copia y pega TODO el resultado en el chat para que pueda analizarlo
 
-
-# Desde aquí puedes:
-
-Ver las tablas actuales:
-
-\dt
-
-
-Ver las bases de datos disponibles:
-
-\l
-
-
-Salir del cliente psql:
-
-\q
-
-
-Ver los usuarios existentes:
-
-\du
-
+Este script nos ayudará a identificar exactamente dónde está el problema.
