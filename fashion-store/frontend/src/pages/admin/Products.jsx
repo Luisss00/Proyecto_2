@@ -16,12 +16,13 @@ const AdminProducts = () => {
     fetchData();
   }, [selectedCategory]);
 
-  const fetchData = async () => {
+const fetchData = async () => {
     try {
       setLoading(true);
       const params = selectedCategory ? { category: selectedCategory } : {};
       const [productsData, categoriesData] = await Promise.all([
-        productService.getAll(params),
+        // Los administradores pueden ver todos los productos
+        productService.getAllForAdmin ? productService.getAllForAdmin() : productService.getAll(params),
         categoryService.getAll(),
       ]);
       setProducts(Array.isArray(productsData) ? productsData : productsData.results || []);
@@ -205,7 +206,7 @@ const AdminProducts = () => {
                           <Eye className="h-5 w-5" />
                         </button>
                         <button
-                          onClick={() => navigate(`/admin/productos/${product.id}/edit`)}
+                          onClick={() => navigate(`/admin/productos/edit/${product.id}`)}
                           className="text-yellow-600 hover:text-yellow-900"
                           title="Editar producto"
                         >

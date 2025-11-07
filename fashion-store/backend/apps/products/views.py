@@ -28,7 +28,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 class ProductViewSet(viewsets.ModelViewSet):
     """ViewSet para gestionar productos"""
-    queryset = Product.objects.filter(is_active=True).select_related(
+    queryset = Product.objects.all().select_related(
         'category', 'vendor'
     ).prefetch_related('images', 'reviews')
     
@@ -130,21 +130,48 @@ class ProductViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def all_for_admin(self, request):
+        """Todos los productos para administradores"""
+        if request.user.role != 'administrador':
+            return Response(
+                {'error': 'Solo administradores pueden acceder'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        products = Product.objects.all().select_related(
+            'category', 'vendor'
+        ).prefetch_related('images')
+        
+        serializer = ProductListSerializer(
+            products,
+            many=True,
+            context={'request': request}
+        )
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def my_products(self, request):
         """Productos del vendedor actual"""
         if request.user.role not in ['vendedor', 'administrador']:
             return Response(
-                {'error': 'Solo vendedores pueden acceder'}, 
+                {'error': 'Solo vendedores pueden acceder'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        products = Product.objects.filter(vendor=request.user).select_related(
-            'category'
-        ).prefetch_related('images')
+        if request.user.role == 'administrador':
+            # Los administradores pueden ver todos los productos
+            products = Product.objects.all().select_related(
+                'category', 'vendor'
+            ).prefetch_related('images')
+        else:
+            # Los vendedores solo ven sus productos
+            products = Product.objects.filter(vendor=request.user).select_related(
+                'category'
+            ).prefetch_related('images')
         
         serializer = ProductListSerializer(
-            products, 
-            many=True, 
+            products,
+            many=True,
             context={'request': request}
         )
         return Response(serializer.data)

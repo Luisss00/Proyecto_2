@@ -100,6 +100,8 @@ function App() {
               <Route path="productos" element={<AdminProducts />} />
               <Route path="productos/create" element={<ProductForm />} />
               <Route path="productos/edit/:id" element={<ProductForm />} />
+              {/* Redirección para la ruta incorrecta (singular) */}
+              <Route path="producto" element={<Navigate to="/admin/productos" replace />} />
               <Route path="usuarios" element={<AdminUsers />} />
               <Route path="pedidos" element={<AdminOrders />} />
               <Route path="reportes" element={<AdminReports />} />

@@ -150,6 +150,11 @@ export const productService = {
     const response = await api.get('/products/products/low_stock/');
     return response.data;
   },
+  
+  getAllForAdmin: async () => {
+    const response = await api.get('/products/products/all_for_admin/');
+    return response.data;
+  },
 };
 
 // ==================== CATEGORY SERVICES ====================
