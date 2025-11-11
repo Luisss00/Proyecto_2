@@ -130,22 +130,6 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Rol */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Tipo de cuenta *
-              </label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="input-field"
-              >
-                <option value="cliente">Cliente</option>
-                <option value="vendedor">Vendedor</option>
-              </select>
-            </div>
-
             {/* Contraseña */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">

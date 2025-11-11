@@ -14,15 +14,6 @@ const MOCK_USERS = [
   },
   {
     id: 2,
-    username: 'vendedor1',
-    email: 'vendedor1@test.com',
-    password: 'Vendedor123!',
-    role: 'vendedor',
-    first_name: 'Vendedor',
-    last_name: 'Uno'
-  },
-  {
-    id: 3,
     username: 'admin',
     email: 'admin@test.com',
     password: 'Admin123!',
@@ -124,7 +115,7 @@ export const AuthProviderMock = ({ children }) => {
     logout,
     isAuthenticated: !!user,
     isCliente: user?.role === 'cliente',
-    isVendedor: user?.role === 'vendedor',
+    
     isAdmin: user?.role === 'administrador',
   };
 

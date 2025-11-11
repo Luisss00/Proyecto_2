@@ -12,7 +12,7 @@ from .serializers import (
     ProductDetailSerializer, ProductCreateUpdateSerializer,
     ReviewSerializer
 )
-from apps.users.permissions import IsVendedorOrAdmin, IsOwnerOrAdmin
+from apps.users.permissions import IsAdministrador, IsOwnerOrAdmin
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -23,7 +23,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [AllowAny()]
-        return [IsVendedorOrAdmin()]
+        return [IsAdministrador()]
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -51,13 +51,13 @@ class ProductViewSet(viewsets.ModelViewSet):
         return context
     
     def get_permissions(self):
-        if self.action in ['list', 'retrieve', 'featured', 'offers']:
+        if self.action in ['list', 'retrieve', 'featured', 'offers', 'latest', 'by_category']:
             return [AllowAny()]
         elif self.action in ['create']:
-            return [IsVendedorOrAdmin()]
-        elif self.action in ['update', 'partial_update', 'destroy']:
-            return [IsOwnerOrAdmin()]
-        return [IsAuthenticated()]
+            return [IsAdministrador()]
+        elif self.action in ['update', 'partial_update', 'destroy', 'add_review']:
+            return [IsAuthenticated()]
+        return [IsAdministrador()]
     
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -129,137 +129,15 @@ class ProductViewSet(viewsets.ModelViewSet):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'], permission_classes=[IsAdministrador])
     def all_for_admin(self, request):
         """Todos los productos para administradores"""
-        if request.user.role != 'administrador':
-            return Response(
-                {'error': 'Solo administradores pueden acceder'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
         products = Product.objects.all().select_related(
             'category', 'vendor'
         ).prefetch_related('images')
         
         serializer = ProductListSerializer(
             products,
-            many=True,
-            context={'request': request}
-        )
-        return Response(serializer.data)
-    
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
-    def my_products(self, request):
-        """Productos del vendedor actual"""
-        if request.user.role not in ['vendedor', 'administrador']:
-            return Response(
-                {'error': 'Solo vendedores pueden acceder'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        if request.user.role == 'administrador':
-            # Los administradores pueden ver todos los productos
-            products = Product.objects.all().select_related(
-                'category', 'vendor'
-            ).prefetch_related('images')
-        else:
-            # Los vendedores solo ven sus productos
-            products = Product.objects.filter(vendor=request.user).select_related(
-                'category'
-            ).prefetch_related('images')
-        
-        serializer = ProductListSerializer(
-            products,
-            many=True,
-            context={'request': request}
-        )
-        return Response(serializer.data)
-    
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
-    def vendor_statistics(self, request):
-        """Estadísticas del vendedor"""
-        if request.user.role not in ['vendedor', 'administrador']:
-            return Response(
-                {'error': 'Solo vendedores pueden acceder'}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        from apps.orders.models import OrderItem
-        
-        # Productos del vendedor
-        vendor_products = Product.objects.filter(vendor=request.user)
-        
-        # Estadísticas generales
-        total_products = vendor_products.count()
-        active_products = vendor_products.filter(is_active=True).count()
-        
-        # Ventas totales
-        total_sales = OrderItem.objects.filter(
-            product__vendor=request.user,
-            order__status='entregado'
-        ).aggregate(
-            total=Sum('price'),
-            count=Count('id')
-        )
-        
-        # Productos más vendidos
-        top_products = OrderItem.objects.filter(
-            product__vendor=request.user,
-            order__status='entregado'
-        ).values(
-            'product__id',
-            'product__name'
-        ).annotate(
-            total_sold=Sum('quantity'),
-            revenue=Sum('price')
-        ).order_by('-total_sold')[:5]
-        
-        # Ventas por mes (últimos 6 meses)
-        six_months_ago = datetime.now() - timedelta(days=180)
-        monthly_sales = OrderItem.objects.filter(
-            product__vendor=request.user,
-            order__status='entregado',
-            order__created_at__gte=six_months_ago
-        ).annotate(
-            month=TruncMonth('order__created_at')
-        ).values('month').annotate(
-            revenue=Sum('price'),
-            orders=Count('order', distinct=True)
-        ).order_by('month')
-        
-        # Stock bajo
-        low_stock = vendor_products.filter(stock__lte=5, stock__gt=0).count()
-        out_of_stock = vendor_products.filter(stock=0).count()
-        
-        return Response({
-            'total_products': total_products,
-            'active_products': active_products,
-            'total_revenue': total_sales['total'] or 0,
-            'total_orders': total_sales['count'] or 0,
-            'top_products': list(top_products),
-            'monthly_sales': list(monthly_sales),
-            'low_stock_count': low_stock,
-            'out_of_stock_count': out_of_stock,
-        })
-    
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
-    def low_stock(self, request):
-        """Productos con stock bajo"""
-        if request.user.role not in ['vendedor', 'administrador']:
-            return Response(
-                {'error': 'Solo vendedores pueden acceder'}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        low_stock_products = Product.objects.filter(
-            vendor=request.user,
-            stock__lte=5,
-            is_active=True
-        ).select_related('category').prefetch_related('images')
-        
-        serializer = ProductListSerializer(
-            low_stock_products,
             many=True,
             context={'request': request}
         )

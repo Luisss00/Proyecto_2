@@ -30,8 +30,6 @@ const Login = () => {
       // Redirigir según el rol
       if (user.role === 'administrador') {
         navigate('/admin/dashboard');
-      } else if (user.role === 'vendedor') {
-        navigate('/vendedor/productos');
       } else {
         navigate('/');
       }
@@ -125,7 +123,6 @@ const Login = () => {
           </p>
           <ul className="text-xs text-blue-800 dark:text-blue-200 space-y-1">
             <li>👤 Admin: admin / Admin123!</li>
-            <li>👤 Vendedor: vendedor1 / Vendedor123!</li>
             <li>👤 Cliente: cliente1 / Cliente123!</li>
           </ul>
         </div>

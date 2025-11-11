@@ -7,7 +7,7 @@ const AdminSettings = () => {
     storeName: 'Fashion Store',
     storeEmail: 'info@fashionstore.com',
     storePhone: '+57 300 123 4567',
-    storeAddress: 'Medellín, Colombia',
+    storeAddress: 'Cienaga Magdalena, Colombia',
     facebook: 'https://facebook.com/fashionstore',
     instagram: 'https://instagram.com/fashionstore',
     twitter: 'https://twitter.com/fashionstore',

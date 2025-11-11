@@ -9,7 +9,6 @@ import Footer from './components/Footer';
 
 // Layouts
 import AdminLayout from './components/admin/AdminLayout';
-import VendorLayout from './components/vendor/VendorLayout';
 
 // Páginas públicas
 import Home from './pages/Home';
@@ -28,14 +27,7 @@ import AdminUsers from './pages/admin/Users';
 import AdminOrders from './pages/admin/Orders';
 import AdminReports from './pages/admin/Reports';
 import AdminSettings from './pages/admin/Settings';
-import ProductForm from './pages/admin/ProductForm';
-
-// Páginas de vendedor
-import VendorDashboard from './pages/vendor/Dashboard';
-import VendorProducts from './pages/vendor/Products';
-import VendorOrders from './pages/vendor/Orders';
-import VendorStatistics from './pages/vendor/Statistics';
-import VendorProfile from './pages/vendor/Profile';
+import ProductForm from '../components/admin/ProductForm';
 
 function App() {
   return (
@@ -63,7 +55,7 @@ function App() {
                       <Route
                         path="/carrito"
                         element={
-                          <ProtectedRoute allowedRoles={['cliente', 'vendedor', 'administrador']}>
+                          <ProtectedRoute allowedRoles={['cliente', 'administrador']}>
                             <Cart />
                           </ProtectedRoute>
                         }
@@ -71,7 +63,7 @@ function App() {
                       <Route
                         path="/checkout"
                         element={
-                          <ProtectedRoute allowedRoles={['cliente', 'vendedor', 'administrador']}>
+                          <ProtectedRoute allowedRoles={['cliente', 'administrador']}>
                             <Checkout />
                           </ProtectedRoute>
                         }
@@ -106,25 +98,6 @@ function App() {
               <Route path="pedidos" element={<AdminOrders />} />
               <Route path="reportes" element={<AdminReports />} />
               <Route path="configuracion" element={<AdminSettings />} />
-            </Route>
-
-            {/* ==================== RUTAS DE VENDEDOR ==================== */}
-            <Route
-              path="/vendedor/*"
-              element={
-                <ProtectedRoute allowedRoles={['vendedor', 'administrador']}>
-                  <VendorLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="/vendedor/dashboard" replace />} />
-              <Route path="dashboard" element={<VendorDashboard />} />
-              <Route path="productos" element={<VendorProducts />} />
-              <Route path="productos/nuevo" element={<ProductForm />} />
-              <Route path="productos/editar/:id" element={<ProductForm />} />
-              <Route path="pedidos" element={<VendorOrders />} />
-              <Route path="estadisticas" element={<VendorStatistics />} />
-              <Route path="perfil" element={<VendorProfile />} />
             </Route>
           </Routes>
 

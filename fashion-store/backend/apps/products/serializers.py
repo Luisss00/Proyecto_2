@@ -92,7 +92,7 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
         ]
     
     def create(self, validated_data):
-        """Crear producto con el usuario actual como vendedor"""
+        """Crear producto con el usuario actual como administrador"""
         validated_data['vendor'] = self.context['request'].user
         
         # Crear el producto

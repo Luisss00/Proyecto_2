@@ -41,11 +41,9 @@ class UserViewSet(viewsets.ModelViewSet):
         total_users = User.objects.count()
         administradores = User.objects.filter(role='administrador').count()
         clientes = User.objects.filter(role='cliente').count()
-        vendedores = User.objects.filter(role='vendedor').count()
         
         return Response({
             'total_users': total_users,
             'administradores': administradores,
             'clientes': clientes,
-            'vendedores': vendedores,
         })

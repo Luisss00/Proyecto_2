@@ -130,24 +130,9 @@ export const productService = {
     const response = await api.delete(`/products/products/${id}/`);
     return response.data;
   },
-  
-  getMyProducts: async () => {
-    const response = await api.get('/products/products/my_products/');
-    return response.data;
-  },
-  
+    
   addReview: async (productId, reviewData) => {
     const response = await api.post(`/products/products/${productId}/add_review/`, reviewData);
-    return response.data;
-  },
-
-  getVendorStatistics: async () => {
-    const response = await api.get('/products/products/vendor_statistics/');
-    return response.data;
-  },
-  
-  getLowStock: async () => {
-    const response = await api.get('/products/products/low_stock/');
     return response.data;
   },
   
@@ -242,10 +227,6 @@ export const orderService = {
     return response.data;
   },
 
-  getVendorOrders: async () => {
-    const response = await api.get('/orders/vendor_orders/');
-    return response.data;
-  },
 };
 
 // ==================== USER SERVICES ====================

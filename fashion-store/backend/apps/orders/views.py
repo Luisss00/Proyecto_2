@@ -28,11 +28,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         if user.role == 'administrador':
             return Order.objects.all()
-        elif user.role == 'vendedor':
-            # Vendedor ve pedidos que contienen sus productos
-            return Order.objects.filter(
-                items__product__vendor=user
-            ).distinct()
         else:
             # Cliente solo ve sus propios pedidos
             return Order.objects.filter(user=user)
@@ -103,19 +98,4 @@ class OrderViewSet(viewsets.ModelViewSet):
             'orders_by_day': list(orders_by_day),
         })
     
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
-    def vendor_orders(self, request):
-        """Pedidos que contienen productos del vendedor"""
-        if request.user.role not in ['vendedor', 'administrador']:
-            return Response(
-                {'error': 'Solo vendedores pueden acceder'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        # Obtener pedidos que contienen productos del vendedor
-        orders = Order.objects.filter(
-            items__product__vendor=request.user
-        ).distinct().select_related('user').prefetch_related('items__product')
-        
-        serializer = OrderSerializer(orders, many=True, context={'request': request})
-        return Response(serializer.data)
+    

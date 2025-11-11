@@ -34,7 +34,7 @@ const ProductForm = () => {
   const [newSize, setNewSize] = useState('');
   const [newColor, setNewColor] = useState('');
 
-  const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+  const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL',35,36,37,38,39,40,41,42,43,44,45];
 
   // Helper function to safely parse JSON arrays
   const safeParseArray = (value) => {
@@ -276,7 +276,7 @@ const ProductForm = () => {
       }
       
       // Determinar la ruta de redirección basada en el rol del usuario
-      const redirectPath = user?.role === 'vendedor' ? '/vendedor/productos' : '/admin/productos';
+      const redirectPath = '/admin/productos';
       navigate(redirectPath);
     } catch (error) {
       console.error('Error saving product:', error);
@@ -332,7 +332,7 @@ const ProductForm = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate(user?.role === 'vendedor' ? '/vendedor/productos' : '/admin/productos')}
+          onClick={() => navigate('/admin/productos')}
           className="btn-secondary flex items-center gap-2"
         >
           <X className="h-4 w-4" />
@@ -708,7 +708,7 @@ const ProductForm = () => {
         <div className="flex justify-end space-x-4">
           <button
             type="button"
-            onClick={() => navigate(user?.role === 'vendedor' ? '/vendedor/productos' : '/admin/productos')}
+            onClick={() => navigate('/admin/productos')}
             className="btn-secondary"
           >
             Cancelar

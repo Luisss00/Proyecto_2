@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { userService } from '../../services/api';
-import { Search, Shield, UserCheck, UserX, ExternalLink } from 'lucide-react';
+import { Search, Shield, UserX, ExternalLink } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 const AdminUsers = () => {
@@ -30,7 +30,7 @@ const AdminUsers = () => {
   const getRoleBadge = (role) => {
     const badges = {
       administrador: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-      vendedor: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+      
       cliente: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
     };
     return badges[role] || badges.cliente;
@@ -38,7 +38,7 @@ const AdminUsers = () => {
 
   const getRoleIcon = (role) => {
     if (role === 'administrador') return <Shield className="h-4 w-4" />;
-    if (role === 'vendedor') return <UserCheck className="h-4 w-4" />;
+    
     return <UserX className="h-4 w-4" />;
   };
 
@@ -100,13 +100,12 @@ const AdminUsers = () => {
           >
             <option value="">Todos los roles</option>
             <option value="cliente">Clientes</option>
-            <option value="vendedor">Vendedores</option>
             <option value="administrador">Administradores</option>
           </select>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="card bg-gradient-to-br from-purple-500 to-purple-600 text-white">
           <div className="flex items-center justify-between">
             <div>
@@ -116,17 +115,6 @@ const AdminUsers = () => {
               </p>
             </div>
             <Shield className="h-12 w-12 text-purple-200" />
-          </div>
-        </div>
-        <div className="card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-blue-100">Vendedores</p>
-              <p className="text-3xl font-bold">
-                {users.filter((u) => u.role === 'vendedor').length}
-              </p>
-            </div>
-            <UserCheck className="h-12 w-12 text-blue-200" />
           </div>
         </div>
         <div className="card bg-gradient-to-br from-green-500 to-green-600 text-white">

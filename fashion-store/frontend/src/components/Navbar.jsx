@@ -17,8 +17,7 @@ const Navbar = () => {
 
   const getDashboardLink = () => {
     if (user?.role === 'administrador') return '/admin/dashboard';
-    if (user?.role === 'vendedor') return '/vendedor/productos';
-    return '/cliente/perfil';
+    return '/';
   };
 
   return (
@@ -65,7 +64,6 @@ const Navbar = () => {
                   className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 transition"
                 >
                   {user?.role === 'administrador' && <BarChart3 className="h-5 w-5" />}
-                  {user?.role === 'vendedor' && <Package className="h-5 w-5" />}
                   {user?.role === 'cliente' && <User className="h-5 w-5" />}
                   <span>{user?.username}</span>
                 </Link>

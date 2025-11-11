@@ -23,7 +23,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Las contraseñas no coinciden"})
         
-        if attrs.get('role') not in ['cliente', 'vendedor', 'administrador']:
+        if attrs.get('role') not in ['cliente', 'administrador']:
             attrs['role'] = 'cliente'
         
         return attrs

@@ -1,5 +1,25 @@
 # SCRIPT DE DIAGNOSTICO DEL FRONTEND
 
+Opción 1: Publicar manualmente (la más común)
+
+Cada vez que hagas cambios, ejecutas:
+
+npm run build
+npm run deploy
+
+
+Esto:
+
+Compila tu proyecto → genera una nueva carpeta dist/
+
+La sube automáticamente al branch gh-pages
+
+GitHub Pages detecta el cambio y actualiza tu web (normalmente en 1–2 minutos)
+
+👉 Esta es la forma más directa y segura.
+
+
+
 Para diagnosticar el problema del panel de admin, ve a:
 
 1. Abre http://localhost:3000/admin/usuarios en el navegador
