@@ -29,6 +29,15 @@ import AdminReports from './pages/admin/Reports';
 import AdminSettings from './pages/admin/Settings';
 import ProductForm from './components/admin/ProductForm';
 
+// Páginas de cliente
+import ClienteLayout from './components/cliente/ClienteLayout';
+import ClienteProfile from './pages/cliente/Profile';
+import ClienteOrders from './pages/cliente/Orders';
+import ClienteFavorites from './pages/cliente/Favorites';
+import ClienteAddresses from './pages/cliente/Addresses';
+import ClienteSettings from './pages/cliente/Settings';
+
+
 function App() {
   return (
     <Router>
@@ -97,6 +106,23 @@ function App() {
               <Route path="reportes" element={<AdminReports />} />
               <Route path="configuracion" element={<AdminSettings />} />
             </Route>
+
+            {/* ==================== RUTAS DE CLIENTE ==================== */}
+            <Route
+              path="/cliente/*"
+              element={
+                <ProtectedRoute allowedRoles={['cliente', 'administrador']}>
+                  <ClienteLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="/cliente/perfil" replace />} />
+              <Route path="perfil" element={<ClienteProfile />} />
+              <Route path="pedidos" element={<ClienteOrders />} />
+              <Route path="favoritos" element={<ClienteFavorites />} />
+              <Route path="direcciones" element={<ClienteAddresses />} />
+              <Route path="configuracion" element={<ClienteSettings />} />
+          </Route>
           </Routes>
 
           {/* Toast Notifications */}
@@ -115,6 +141,8 @@ function App() {
         </CartProvider>
       </AuthProvider>
     </Router>
+
+
   );
 }
 

@@ -30,9 +30,12 @@ const Login = () => {
       // Redirigir según el rol
       if (user.role === 'administrador') {
         navigate('/admin/dashboard');
-      } else {
+      } else if (user.role === 'cliente') {
+        navigate('/cliente/perfil');
+      }else {
         navigate('/');
       }
+      
     } catch (error) {
       console.error('Login error:', error);
     } finally {
