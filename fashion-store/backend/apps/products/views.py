@@ -145,14 +145,27 @@ class ProductViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def by_category(self, request):
-        category_id = request.query_params.get('category')
-        if not category_id:
+        category_name = request.query_params.get('category')
+        if not category_name:
             return Response(
                 {'error': 'Parámetro category requerido'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        products = self.get_queryset().filter(category_id=category_id)
+        # Buscar la categoría por nombre (insensible a mayúsculas/minúsculas)
+        try:
+            category = Category.objects.get(
+                name__iexact=category_name,
+                is_active=True
+            )
+        except Category.DoesNotExist:
+            return Response(
+                {'error': f'Categoría "{category_name}" no encontrada'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Filtrar productos por la categoría encontrada
+        products = self.get_queryset().filter(category=category)
         serializer = ProductListSerializer(
             products, 
             many=True, 

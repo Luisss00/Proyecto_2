@@ -140,6 +140,13 @@ export const productService = {
     const response = await api.get('/products/products/all_for_admin/');
     return response.data;
   },
+  
+  getByCategory: async (categoryName) => {
+    const response = await api.get('/products/products/by_category/', { 
+      params: { category: categoryName } 
+    });
+    return response.data;
+  },
 };
 
 // ==================== CATEGORY SERVICES ====================

@@ -1,19 +1,31 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Package, Mail, Phone, MapPin } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import storeConfigService from '../services/storeConfig';
+import { categoryService, productService } from '../services/api';
 
 const Footer = () => {
   const [config, setConfig] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const loadConfig = async () => {
+    const loadData = async () => {
       try {
+        // Cargar configuración de la tienda
         const configData = await storeConfigService.getPublicConfig();
         setConfig(configData);
+        
+        // Cargar categorías
+        const categoriesData = await categoryService.getAll();
+        // Extraer solo las categorías activas y ordenar por nombre
+        const activeCategories = categoriesData.results
+          .filter(category => category.is_active)
+          .sort((a, b) => a.name.localeCompare(b.name));
+        setCategories(activeCategories);
       } catch (error) {
-        console.error('Error al cargar configuración:', error);
+        console.error('Error al cargar datos del footer:', error);
         // Usar valores por defecto en caso de error
         setConfig({
           store_name: 'Fashion Store',
@@ -24,13 +36,32 @@ const Footer = () => {
           instagram_url: 'https://instagram.com/fashionstore',
           twitter_url: 'https://twitter.com/fashionstore',
         });
+        setCategories([]);
       } finally {
         setLoading(false);
       }
     };
 
-    loadConfig();
+    loadData();
   }, []);
+
+  const handleCategoryClick = async (categoryName) => {
+    try {
+      // Navegar a la página de productos con la categoría como filtro
+      navigate(`/productos?categoria=${categoryName}`);
+      
+      // Si estamos en la página de productos, hacer request AJAX para filtrar
+      if (window.location.pathname === '/productos') {
+        const products = await productService.getByCategory(categoryName);
+        // Emitir evento personalizado para que el componente Products lo escuche
+        window.dispatchEvent(new CustomEvent('filterProducts', { 
+          detail: { products, categoryName } 
+        }));
+      }
+    } catch (error) {
+      console.error('Error al filtrar productos por categoría:', error);
+    }
+  };
 
   if (loading) {
     return (
@@ -74,10 +105,22 @@ const Footer = () => {
           <div>
             <h3 className="text-white font-semibold mb-4">Categorías</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/productos?categoria=camisetas" className="hover:text-primary-600 transition">Camisetas</Link></li>
-              <li><Link to="/productos?categoria=pantalones" className="hover:text-primary-600 transition">Pantalones</Link></li>
-              <li><Link to="/productos?categoria=vestidos" className="hover:text-primary-600 transition">Vestidos</Link></li>
-              <li><Link to="/productos?categoria=zapatos" className="hover:text-primary-600 transition">Zapatos</Link></li>
+              {categories.length > 0 ? (
+                categories.map((category) => (
+                  <li key={category.id}>
+                    <button
+                      onClick={() => handleCategoryClick(category.name)}
+                      className="hover:text-primary-600 transition text-left w-full"
+                    >
+                      {category.name}
+                    </button>
+                  </li>
+                ))
+              ) : (
+                <li>
+                  <span className="text-gray-500">Cargando categorías...</span>
+                </li>
+              )}
             </ul>
           </div>
 

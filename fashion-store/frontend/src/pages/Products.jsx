@@ -41,6 +41,41 @@ const Products = () => {
     fetchProducts();
   }, [searchParams]);
 
+  // Listener para el evento de filtro desde el footer
+  useEffect(() => {
+    const handleFilterProducts = (event) => {
+      const { products, categoryName } = event.detail;
+      
+      // Procesar productos recibidos del evento
+      const processedProducts = products.map(product => ({
+        ...product,
+        available_sizes: safeParseArray(product.available_sizes),
+        colors: safeParseArray(product.colors),
+      }));
+      
+      setProducts(processedProducts);
+      setSelectedCategory(categoryName);
+      setSearchTerm('');
+      
+      // Actualizar URL sin recargar la página
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set('categoria', categoryName);
+      setSearchParams(newParams);
+      
+      // Scroll hacia arriba para mostrar los productos filtrados
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Mostrar notificación
+      toast.success(`Mostrando productos de la categoría: ${categoryName}`);
+    };
+
+    window.addEventListener('filterProducts', handleFilterProducts);
+    
+    return () => {
+      window.removeEventListener('filterProducts', handleFilterProducts);
+    };
+  }, [searchParams, setSearchParams]);
+
   const fetchCategories = async () => {
     try {
       const data = await categoryService.getAll();
@@ -54,21 +89,42 @@ const Products = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      const categoryParam = searchParams.get('categoria');
+      const searchParam = searchParams.get('search');
+      const orderingParam = searchParams.get('ordering');
+      
+      let data;
+      
+      // Si hay categoría, usar el endpoint específico por categoría
+      if (categoryParam) {
+        data = await productService.getByCategory(categoryParam);
+        // Convertir el array de productos en el formato esperado
+        const products = Array.isArray(data) ? data : [];
+        
+        const processedProducts = products.map(product => ({
+          ...product,
+          available_sizes: safeParseArray(product.available_sizes),
+          colors: safeParseArray(product.colors),
+        }));
+        
+        setProducts(processedProducts);
+        console.log('Products loaded by category:', processedProducts.length);
+        setLoading(false);
+        return;
+      }
+      
+      // Si no hay categoría, usar el endpoint general con otros filtros
       const params = {};
       
-      if (searchParams.get('search')) {
-        params.search = searchParams.get('search');
+      if (searchParam) {
+        params.search = searchParam;
       }
       
-      if (searchParams.get('categoria')) {
-        params.category = searchParams.get('categoria');
+      if (orderingParam) {
+        params.ordering = orderingParam;
       }
 
-      if (searchParams.get('ordering')) {
-        params.ordering = searchParams.get('ordering');
-      }
-
-      const data = await productService.getAll(params);
+      data = await productService.getAll(params);
       const products = Array.isArray(data) ? data : data.results || [];
       
       // Apply safeParseArray to all products to ensure available_sizes is always an array
@@ -99,10 +155,10 @@ const Products = () => {
     setSearchParams(searchParams);
   };
 
-  const handleCategoryChange = (categorySlug) => {
-    setSelectedCategory(categorySlug);
-    if (categorySlug) {
-      searchParams.set('categoria', categorySlug);
+  const handleCategoryChange = (categoryName) => {
+    setSelectedCategory(categoryName);
+    if (categoryName) {
+      searchParams.set('categoria', categoryName);
     } else {
       searchParams.delete('categoria');
     }
@@ -190,7 +246,7 @@ const Products = () => {
             >
               <option value="">Todas las categorías</option>
               {(categories || []).map((category) => (
-                <option key={category.id} value={category.slug}>
+                <option key={category.id} value={category.name}>
                   {category.name}
                 </option>
               ))}
