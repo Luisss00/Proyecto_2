@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, Save, Upload, Mail, Phone, MapPin, CreditCard } from 'lucide-react';
 import { toast } from 'react-toastify';
+import storeConfigService from '../../services/storeConfig';
 
 const AdminSettings = () => {
   const [settings, setSettings] = useState({
@@ -21,6 +22,25 @@ const AdminSettings = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  // Cargar configuración inicial
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const configData = await storeConfigService.getConfig();
+        const formData = storeConfigService.formatApiToForm(configData);
+        setSettings(formData);
+      } catch (error) {
+        console.error('Error al cargar configuración:', error);
+        toast.error('Error al cargar la configuración');
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+
+    loadConfig();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -34,9 +54,11 @@ const AdminSettings = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const apiData = storeConfigService.formatFormData(settings);
+      await storeConfigService.updateConfig(apiData);
       toast.success('Configuración guardada exitosamente');
     } catch (error) {
+      console.error('Error al guardar configuración:', error);
       toast.error('Error al guardar configuración');
     } finally {
       setLoading(false);
@@ -50,6 +72,22 @@ const AdminSettings = () => {
       minimumFractionDigits: 0,
     }).format(price);
   };
+
+  // Mostrar loading durante la carga inicial
+  if (initialLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Configuración del Sistema</h1>
+          <p className="text-gray-600 mt-1">Administra la configuración general</p>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <span className="ml-3 text-gray-600">Cargando configuración...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

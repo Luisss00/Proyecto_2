@@ -22,6 +22,7 @@ def api_root(request):
             'cart': '/api/cart/',
             'orders': '/api/orders/',
             'users': '/api/users/',
+            'store': '/api/store/',
         }
     })
 
@@ -39,6 +40,7 @@ urlpatterns = [
     path('api/products/', include('apps.products.urls')),
     path('api/cart/', include('apps.cart.urls')),
     path('api/orders/', include('apps.orders.urls')),
+    path('api/store/', include('apps.store.urls')),
 ]
 
 # Always serve media files for this development setup
