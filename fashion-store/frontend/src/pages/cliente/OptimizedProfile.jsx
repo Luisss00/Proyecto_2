@@ -319,46 +319,36 @@ const OptimizedClienteProfile = () => {
           />
         </div>
 
-        <div className="flex gap-3">
-          {user?.role === 'cliente' && !editing && (
-            <a
-              href="/productos"
-              className="btn-primary flex items-center gap-2"
-            >
-              <User className="h-5 w-5" />
-              Ir a la tienda
-            </a>
-          )}
-          
+        <div className="flex gap-3 items-center">
           {!editing ? (
             <button
               onClick={handleEdit}
-              className="btn-secondary flex items-center gap-2"
+              className="btn-secondary flex items-center gap-2 px-4 py-2 text-sm"
             >
-              <Edit className="h-5 w-5" />
+              <Edit className="h-4 w-4" />
               Editar perfil
             </button>
           ) : (
             <div className="flex gap-3">
               <button
                 onClick={handleCancel}
-                className="btn-secondary"
+                className="btn-secondary px-4 py-2 text-sm"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSave}
                 disabled={!isValid || saveStatus === 'saving'}
-                className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-primary-600 hover:bg-primary-700 text-white font-medium px-6 py-2 rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
               >
                 {saveStatus === 'saving' ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                     Guardando...
                   </>
                 ) : (
                   <>
-                    <Save className="h-5 w-5" />
+                    <Save className="h-4 w-4" />
                     Guardar cambios
                   </>
                 )}

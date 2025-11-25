@@ -9,7 +9,8 @@ import {
   LogOut,
   Menu,
   X,
-  Home
+  Home,
+  ShoppingCart
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -24,6 +25,13 @@ const ClienteLayout = () => {
   };
 
   const menuItems = [
+    { 
+      path: '/productos', 
+      icon: ShoppingCart, 
+      label: 'Ir a la Tienda',
+      description: 'Explorar productos',
+      roles: ['cliente'] // Solo para clientes
+    },
     { 
       path: '/cliente/perfil', 
       icon: User, 
@@ -103,7 +111,9 @@ const ClienteLayout = () => {
           <aside className="hidden lg:block w-64 flex-shrink-0">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sticky top-24">
               <nav className="space-y-1">
-                {menuItems.map((item) => (
+                {menuItems
+                  .filter(item => !item.roles || item.roles.includes(user?.role))
+                  .map((item) => (
                   <NavLink
                     key={item.path}
                     to={item.path}
@@ -153,7 +163,9 @@ const ClienteLayout = () => {
                 </div>
 
                 <nav className="p-4 space-y-1">
-                  {menuItems.map((item) => (
+                  {menuItems
+                    .filter(item => !item.roles || item.roles.includes(user?.role))
+                    .map((item) => (
                     <NavLink
                       key={item.path}
                       to={item.path}
