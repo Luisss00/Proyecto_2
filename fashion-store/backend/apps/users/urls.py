@@ -8,7 +8,6 @@ router.register(r'', UserViewSet, basename='user')
 
 urlpatterns = [
     path('profile/', UserProfileView.as_view(), name='user-profile'),
+    path('change_password/', change_password, name='change-password'),
     path('', include(router.urls)),
-     path('users/change_password/', change_password, name='change-password'),
-    
 ]

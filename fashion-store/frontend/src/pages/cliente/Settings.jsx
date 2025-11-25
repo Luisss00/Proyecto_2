@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Lock, Bell, Eye, EyeOff, Shield } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { authService } from '../../services/api';
+import { userService } from '../../services/api';
 
 const ClienteSettings = () => {
   const [passwordForm, setPasswordForm] = useState({
@@ -31,7 +31,7 @@ const ClienteSettings = () => {
 
     setLoading(true);
     try {
-      await authService.changePassword({
+      await userService.changePassword({
         old_password: passwordForm.current_password,
         new_password: passwordForm.new_password,
       });
