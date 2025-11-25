@@ -3,12 +3,26 @@ import { Package, Mail, Phone, MapPin } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import storeConfigService from '../services/storeConfig';
 import { categoryService, productService } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 const Footer = () => {
   const [config, setConfig] = useState(null);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { user, isAdmin, isCliente, isAuthenticated } = useAuth();
+
+  // Función para determinar la ruta de "Mi Cuenta" según el tipo de usuario
+  const getAccountRoute = () => {
+    if (isAuthenticated) {
+      if (isAdmin) {
+        return '/admin/dashboard';
+      } else if (isCliente) {
+        return '/cliente/perfil';
+      }
+    }
+    return '/login';
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -97,7 +111,7 @@ const Footer = () => {
               <li><Link to="/" className="hover:text-primary-600 transition">Inicio</Link></li>
               <li><Link to="/productos" className="hover:text-primary-600 transition">Productos</Link></li>
               <li><Link to="/ofertas" className="hover:text-primary-600 transition">Ofertas</Link></li>
-              <li><Link to="/login" className="hover:text-primary-600 transition">Mi Cuenta</Link></li>
+              <li><Link to={getAccountRoute()} className="hover:text-primary-600 transition">Mi Cuenta</Link></li>
             </ul>
           </div>
 

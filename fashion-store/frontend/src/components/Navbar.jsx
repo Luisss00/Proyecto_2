@@ -17,6 +17,7 @@ const Navbar = () => {
 
   const getDashboardLink = () => {
     if (user?.role === 'administrador') return '/admin/dashboard';
+    if (user?.role === 'cliente') return '/cliente/perfil';
     return '/';
   };
 
@@ -58,14 +59,17 @@ const Navbar = () => {
                   </Link>
                 )}
 
-                {/* Dashboard */}
+                {/* Dashboard/Perfil */}
                 <Link 
                   to={getDashboardLink()} 
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 transition"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 transition cursor-pointer"
+                  title={user?.role === 'administrador' ? 'Panel de Administración' : 'Mi Perfil'}
                 >
                   {user?.role === 'administrador' && <BarChart3 className="h-5 w-5" />}
                   {user?.role === 'cliente' && <User className="h-5 w-5" />}
-                  <span>{user?.username}</span>
+                  <span className="font-medium">
+                    {user?.role === 'administrador' ? user?.username : `Mi Perfil (${user?.username})`}
+                  </span>
                 </Link>
 
                 {/* Logout */}
@@ -118,8 +122,11 @@ const Navbar = () => {
                     Carrito ({itemsCount})
                   </Link>
                 )}
-                <Link to={getDashboardLink()} className="block text-gray-700 dark:text-gray-300 hover:text-primary-600">
-                  Mi Panel
+                <Link 
+                  to={getDashboardLink()} 
+                  className="block text-gray-700 dark:text-gray-300 hover:text-primary-600 font-medium"
+                >
+                  {user?.role === 'administrador' ? `Panel Admin (${user?.username})` : `Mi Perfil (${user?.username})`}
                 </Link>
                 <button onClick={handleLogout} className="block w-full text-left text-red-600 hover:text-red-700">
                   Cerrar Sesión

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services/api';
-import { User, Mail, Phone, MapPin, Save, Edit, Camera } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Save, Edit, Camera, ShoppingBag } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 const ClienteProfile = () => {
@@ -68,13 +69,24 @@ const ClienteProfile = () => {
             </p>
           </div>
           {!editing && (
-            <button
-              onClick={() => setEditing(true)}
-              className="btn-primary flex items-center gap-2"
-            >
-              <Edit className="h-5 w-5" />
-              Editar
-            </button>
+            <div className="flex gap-3">
+              {user?.role === 'cliente' && (
+                <Link
+                  to="/productos"
+                  className="btn-primary flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white transition-colors duration-200"
+                >
+                  <ShoppingBag className="h-5 w-5" />
+                  Ir a la tienda
+                </Link>
+              )}
+              <button
+                onClick={() => setEditing(true)}
+                className="btn-secondary flex items-center gap-2"
+              >
+                <Edit className="h-5 w-5" />
+                Editar
+              </button>
+            </div>
           )}
         </div>
       </div>
