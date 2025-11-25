@@ -31,7 +31,7 @@ import ProductForm from './components/admin/ProductForm';
 
 // Páginas de cliente
 import ClienteLayout from './components/cliente/ClienteLayout';
-import ClienteProfile from './pages/cliente/Profile';
+import OptimizedClienteProfile from './pages/cliente/OptimizedProfile';
 import ClienteOrders from './pages/cliente/Orders';
 import ClienteFavorites from './pages/cliente/Favorites';
 import ClienteAddresses from './pages/cliente/Addresses';
@@ -117,7 +117,7 @@ function App() {
               }
             >
               <Route index element={<Navigate to="/cliente/perfil" replace />} />
-              <Route path="perfil" element={<ClienteProfile />} />
+              <Route path="perfil" element={<OptimizedClienteProfile />} />
               <Route path="pedidos" element={<ClienteOrders />} />
               <Route path="favoritos" element={<ClienteFavorites />} />
               <Route path="direcciones" element={<ClienteAddresses />} />

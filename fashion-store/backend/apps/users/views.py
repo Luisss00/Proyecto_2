@@ -39,6 +39,23 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+    
+    def update(self, request, *args, **kwargs):
+        """Actualizar perfil con mejor manejo de errores"""
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        
+        # Obtener la instancia actualizada
+        updated_instance = self.get_object()
+        updated_serializer = self.get_serializer(updated_instance)
+        
+        return Response({
+            'message': 'Perfil actualizado exitosamente',
+            'profile': updated_serializer.data
+        }, status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):
