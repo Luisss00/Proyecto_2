@@ -68,7 +68,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def featured(self, request):
-        featured_products = self.get_queryset().filter(is_featured=True)[:8]
+        featured_products = self.get_queryset().filter(is_featured=True, is_active=True)[:8]
         serializer = ProductListSerializer(
             featured_products, 
             many=True, 
@@ -78,7 +78,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def offers(self, request):
-        offers = self.get_queryset().exclude(discount_price__isnull=True)[:12]
+        offers = self.get_queryset().exclude(discount_price__isnull=True).filter(is_active=True)[:12]
         serializer = ProductListSerializer(
             offers, 
             many=True, 
@@ -88,7 +88,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def latest(self, request):
-        latest = self.get_queryset().order_by('-created_at')[:8]
+        latest = self.get_queryset().filter(is_active=True).order_by('-created_at')[:8]
         serializer = ProductListSerializer(
             latest, 
             many=True, 
@@ -165,7 +165,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             )
         
         # Filtrar productos por la categoría encontrada
-        products = self.get_queryset().filter(category=category)
+        products = self.get_queryset().filter(category=category, is_active=True)
         serializer = ProductListSerializer(
             products, 
             many=True, 
