@@ -94,6 +94,45 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Productos Destacados */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <TrendingUp className="h-8 w-8 text-primary-600" />
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Productos Destacados
+              </h2>
+            </div>
+            <Link to="/productos" className="text-primary-600 hover:text-primary-700 flex items-center gap-2">
+              Ver más <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          {featuredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 dark:text-gray-400">
+                No hay productos destacados disponibles
+              </p>
+              <Link to="/productos" className="btn-primary mt-4 inline-block">
+                Ver Todos los Productos
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={handleAddToCart}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Categorías */}
       <section className="py-16 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -139,44 +178,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Productos Destacados */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <TrendingUp className="h-8 w-8 text-primary-600" />
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Productos Destacados
-              </h2>
-            </div>
-            <Link to="/productos" className="text-primary-600 hover:text-primary-700 flex items-center gap-2">
-              Ver más <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-
-          {featuredProducts.length === 0 ? (
-            <div className="text-center py-12">
-              <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-gray-400">
-                No hay productos destacados disponibles
-              </p>
-              <Link to="/productos" className="btn-primary mt-4 inline-block">
-                Ver Todos los Productos
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onAddToCart={handleAddToCart}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      
 
       {/* Banner de Ofertas */}
       <section className="py-16 bg-gradient-to-r from-red-500 to-pink-600 text-white">

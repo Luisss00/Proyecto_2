@@ -153,7 +153,7 @@ export const productService = {
 export const categoryService = {
   getAll: async () => {
     const response = await api.get('/products/categories/');
-    return response.data;
+    return response.data.results || response.data;
   },
   
   getById: async (id) => {

@@ -34,7 +34,7 @@ const Footer = () => {
         // Cargar categorías
         const categoriesData = await categoryService.getAll();
         // Extraer solo las categorías activas y ordenar por nombre
-        const activeCategories = categoriesData.results
+        const activeCategories = categoriesData
           .filter(category => category.is_active)
           .sort((a, b) => a.name.localeCompare(b.name));
         setCategories(activeCategories);
