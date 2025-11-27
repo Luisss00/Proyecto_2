@@ -70,6 +70,9 @@ def get_public_config(request):
             'banner_type': config.banner_type,
             'banner_color': config.banner_color,
             'banner_image': config.banner_image.url if config.banner_image else None,
+            'footer_background_color': config.footer_background_color,
+            'footer_text_color': config.footer_text_color,
+            'footer_title_color': config.footer_title_color,
         }
         
         # Construir URL completa si el logo existe

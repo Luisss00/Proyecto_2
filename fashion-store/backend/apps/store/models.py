@@ -51,6 +51,23 @@ class StoreConfiguration(models.Model):
         help_text='Imagen para el banner (máx 5MB)'
     )
     
+    # Configuración del footer
+    footer_background_color = models.CharField(
+        max_length=7,
+        default='#1F2937',
+        help_text='Color de fondo del footer (código hexadecimal)'
+    )
+    footer_text_color = models.CharField(
+        max_length=7,
+        default='#D1D5DB',
+        help_text='Color del texto del footer (código hexadecimal)'
+    )
+    footer_title_color = models.CharField(
+        max_length=7,
+        default='#FFFFFF',
+        help_text='Color de los títulos del footer (código hexadecimal)'
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

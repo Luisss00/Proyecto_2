@@ -85,6 +85,9 @@ const storeConfigService = {
       tax_rate: parseFloat(formData.taxRate),
       banner_type: formData.bannerType,
       banner_color: formData.bannerColor,
+      footer_background_color: formData.footerBackgroundColor || '#1F2937',
+      footer_text_color: formData.footerTextColor || '#D1D5DB',
+      footer_title_color: formData.footerTitleColor || '#FFFFFF',
     };
   },
 
@@ -109,6 +112,9 @@ const storeConfigService = {
       bannerType: apiData.banner_type || 'color',
       bannerColor: apiData.banner_color || '#3B82F6',
       bannerImageUrl: apiData.banner_image_url || apiData.banner_image || null,
+      footerBackgroundColor: apiData.footer_background_color || '#1F2937',
+      footerTextColor: apiData.footer_text_color || '#D1D5DB',
+      footerTitleColor: apiData.footer_title_color || '#FFFFFF',
     };
   },
 };

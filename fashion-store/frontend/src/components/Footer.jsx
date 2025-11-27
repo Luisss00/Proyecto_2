@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Package, Mail, Phone, MapPin } from 'lucide-react';
+import { Package, Mail, Phone, MapPin, Facebook, Instagram, Twitter } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import storeConfigService from '../services/storeConfig';
 import { categoryService, productService } from '../services/api';
@@ -89,8 +89,18 @@ const Footer = () => {
     );
   }
 
+  // Estilos dinámicos basados en la configuración
+  const footerStyle = {
+    backgroundColor: config?.footer_background_color || '#1F2937',
+    color: config?.footer_text_color || '#D1D5DB'
+  };
+
+  const titleStyle = {
+    color: config?.footer_title_color || '#FFFFFF'
+  };
+
   return (
-    <footer className="bg-gray-900 text-gray-300 mt-20">
+    <footer className="mt-20" style={footerStyle}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo y descripción */}
@@ -109,7 +119,7 @@ const Footer = () => {
               ) : (
                 <Package className="h-16 w-16 text-primary-600" />
               )}
-              <span className="text-xl font-bold text-white">{config?.store_name || 'Fashion Store'}</span>
+              <span className="text-xl font-bold" style={titleStyle}>{config?.store_name || 'Fashion Store'}</span>
             </div>
             <p className="text-sm">
               Tu tienda de moda favorita. Calidad, estilo y las mejores ofertas.
@@ -118,7 +128,7 @@ const Footer = () => {
 
           {/* Enlaces rápidos */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Enlaces Rápidos</h3>
+            <h3 className="font-semibold mb-4" style={titleStyle}>Enlaces Rápidos</h3>
             <ul className="space-y-2 text-sm">
               <li><Link to="/" className="hover:text-primary-600 transition">Inicio</Link></li>
               <li><Link to="/productos" className="hover:text-primary-600 transition">Productos</Link></li>
@@ -129,7 +139,7 @@ const Footer = () => {
 
           {/* Categorías */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Categorías</h3>
+            <h3 className="font-semibold mb-4" style={titleStyle}>Categorías</h3>
             <ul className="space-y-2 text-sm">
               {categories.length > 0 ? (
                 categories.map((category) => (
@@ -152,7 +162,7 @@ const Footer = () => {
 
           {/* Contacto */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Contacto</h3>
+            <h3 className="font-semibold mb-4" style={titleStyle}>Contacto</h3>
             <ul className="space-y-2 text-sm">
               {config?.store_email && (
                 <li className="flex items-center gap-2">
@@ -177,33 +187,100 @@ const Footer = () => {
             {/* Redes Sociales */}
             {(config?.facebook_url || config?.instagram_url || config?.twitter_url) && (
               <div className="mt-4">
-                <h4 className="text-white font-medium mb-2">Síguenos</h4>
-                <div className="flex space-x-2">
+                <h4 className="font-medium mb-3" style={titleStyle}>Síguenos</h4>
+                <div className="flex space-x-3">
                   {config?.facebook_url && (
-                    <a href={config.facebook_url} target="_blank" rel="noopener noreferrer" 
-                       className="text-gray-400 hover:text-primary-600 transition">
-                      Facebook
+                    <a 
+                      href={config.facebook_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="p-3 rounded-full hover:bg-opacity-10 hover:bg-white transition-all duration-300 group"
+                      style={{ 
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.querySelector('svg').style.color = config?.footer_title_color || '#FFFFFF';
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.querySelector('svg').style.color = footerStyle.color;
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
+                      title="Síguenos en Facebook"
+                    >
+                      <Facebook 
+                        size={22} 
+                        style={{ 
+                          color: footerStyle.color,
+                          transition: 'color 0.3s ease'
+                        }}
+                      />
                     </a>
                   )}
                   {config?.instagram_url && (
-                    <a href={config.instagram_url} target="_blank" rel="noopener noreferrer"
-                       className="text-gray-400 hover:text-primary-600 transition">
-                      Instagram
+                    <a 
+                      href={config.instagram_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="p-3 rounded-full hover:bg-opacity-10 hover:bg-white transition-all duration-300 group"
+                      style={{ 
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.querySelector('svg').style.color = config?.footer_title_color || '#FFFFFF';
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.querySelector('svg').style.color = footerStyle.color;
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
+                      title="Síguenos en Instagram"
+                    >
+                      <Instagram 
+                        size={22} 
+                        style={{ 
+                          color: footerStyle.color,
+                          transition: 'color 0.3s ease'
+                        }}
+                      />
                     </a>
                   )}
                   {config?.twitter_url && (
-                    <a href={config.twitter_url} target="_blank" rel="noopener noreferrer"
-                       className="text-gray-400 hover:text-primary-600 transition">
-                      Twitter
+                    <a 
+                      href={config.twitter_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="p-3 rounded-full hover:bg-opacity-10 hover:bg-white transition-all duration-300 group"
+                      style={{ 
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.querySelector('svg').style.color = config?.footer_title_color || '#FFFFFF';
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.querySelector('svg').style.color = footerStyle.color;
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
+                      title="Síguenos en Twitter"
+                    >
+                      <Twitter 
+                        size={22} 
+                        style={{ 
+                          color: footerStyle.color,
+                          transition: 'color 0.3s ease'
+                        }}
+                      />
                     </a>
                   )}
                 </div>
+                <p className="text-xs mt-2 opacity-75">Conecta con nosotros</p>
               </div>
             )}
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
+        <div className="border-t mt-8 pt-8 text-center text-sm" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
           <p>&copy; 2025 {config?.store_name || 'Fashion Store'}. Todos los derechos reservados.</p>
         </div>
       </div>

@@ -23,6 +23,9 @@ const AdminSettings = () => {
     bannerType: 'color',
     bannerColor: '#3B82F6',
     bannerImageUrl: null,
+    footerBackgroundColor: '#1F2937',
+    footerTextColor: '#D1D5DB',
+    footerTitleColor: '#FFFFFF',
   });
 
   const [loading, setLoading] = useState(false);
@@ -131,14 +134,39 @@ const AdminSettings = () => {
     return hexPattern.test(color);
   };
 
+  const validateAllColors = () => {
+    const errors = [];
+    
+    // Validar color del banner
+    if (settings.bannerType === 'color' && !validateColor(settings.bannerColor)) {
+      errors.push('Banner: Ingresa un código de color válido (ej: #3B82F6)');
+    }
+
+    // Validar colores del footer
+    if (!validateColor(settings.footerBackgroundColor)) {
+      errors.push('Footer: Color de fondo inválido');
+    }
+    
+    if (!validateColor(settings.footerTextColor)) {
+      errors.push('Footer: Color de texto inválido');
+    }
+    
+    if (!validateColor(settings.footerTitleColor)) {
+      errors.push('Footer: Color de títulos inválido');
+    }
+
+    return errors;
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      // Validar color si está en modo color
-      if (settings.bannerType === 'color' && !validateColor(settings.bannerColor)) {
-        toast.error('Por favor ingresa un código de color válido (ej: #3B82F6)');
+      // Validar todos los colores
+      const colorErrors = validateAllColors();
+      if (colorErrors.length > 0) {
+        toast.error(`Errores de validación: ${colorErrors.join(', ')}`);
         setLoading(false);
         return;
       }
@@ -253,6 +281,199 @@ const AdminSettings = () => {
                 onChange={handleChange}
                 className="input-field"
               />
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <h2 className="text-xl font-semibold mb-6">Personalización del Footer</h2>
+          
+          {/* Vista Previa del Footer */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Vista Previa</label>
+            <div className="relative border border-gray-300 rounded-lg overflow-hidden">
+              <div 
+                className="p-6"
+                style={{ 
+                  backgroundColor: settings.footerBackgroundColor,
+                  color: settings.footerTextColor
+                }}
+              >
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <h3 
+                      className="font-semibold mb-3"
+                      style={{ color: settings.footerTitleColor }}
+                    >
+                      Enlaces Rápidos
+                    </h3>
+                    <ul className="space-y-1 text-sm">
+                      <li>Inicio</li>
+                      <li>Productos</li>
+                      <li>Ofertas</li>
+                      <li>Mi Cuenta</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h3 
+                      className="font-semibold mb-3"
+                      style={{ color: settings.footerTitleColor }}
+                    >
+                      Categorías
+                    </h3>
+                    <ul className="space-y-1 text-sm">
+                      <li>Ropa</li>
+                      <li>Zapatos</li>
+                      <li>Accesorios</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h3 
+                      className="font-semibold mb-3"
+                      style={{ color: settings.footerTitleColor }}
+                    >
+                      Contacto
+                    </h3>
+                    <ul className="space-y-1 text-sm">
+                      <li>info@fashionstore.com</li>
+                      <li>+57 300 123 4567</li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <div 
+                  className="border-t mt-4 pt-4 text-center text-sm"
+                  style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}
+                >
+                  © 2025 Fashion Store. Todos los derechos reservados.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Controles de Color del Footer */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Color de Fondo</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  name="footerBackgroundColor"
+                  value={settings.footerBackgroundColor}
+                  onChange={handleChange}
+                  className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
+                />
+                <input
+                  type="text"
+                  name="footerBackgroundColor"
+                  value={settings.footerBackgroundColor}
+                  onChange={handleChange}
+                  placeholder="#1F2937"
+                  className="input-field flex-1"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Fondo principal del footer</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Color de Texto</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  name="footerTextColor"
+                  value={settings.footerTextColor}
+                  onChange={handleChange}
+                  className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
+                />
+                <input
+                  type="text"
+                  name="footerTextColor"
+                  value={settings.footerTextColor}
+                  onChange={handleChange}
+                  placeholder="#D1D5DB"
+                  className="input-field flex-1"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Color de los textos generales</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Color de Títulos</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  name="footerTitleColor"
+                  value={settings.footerTitleColor}
+                  onChange={handleChange}
+                  className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
+                />
+                <input
+                  type="text"
+                  name="footerTitleColor"
+                  value={settings.footerTitleColor}
+                  onChange={handleChange}
+                  placeholder="#FFFFFF"
+                  className="input-field flex-1"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Color de los títulos y encabezados</p>
+            </div>
+          </div>
+
+          {/* Botones para Colores Predefinidos */}
+          <div className="mt-6">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Colores Predefinidos</h3>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setSettings({
+                  ...settings,
+                  footerBackgroundColor: '#1F2937',
+                  footerTextColor: '#D1D5DB',
+                  footerTitleColor: '#FFFFFF'
+                })}
+                className="px-3 py-2 text-xs border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Oscuro Clásico
+              </button>
+              <button
+                type="button"
+                onClick={() => setSettings({
+                  ...settings,
+                  footerBackgroundColor: '#374151',
+                  footerTextColor: '#F9FAFB',
+                  footerTitleColor: '#FFFFFF'
+                })}
+                className="px-3 py-2 text-xs border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Gris Moderno
+              </button>
+              <button
+                type="button"
+                onClick={() => setSettings({
+                  ...settings,
+                  footerBackgroundColor: '#1F4B99',
+                  footerTextColor: '#E5E7EB',
+                  footerTitleColor: '#FFFFFF'
+                })}
+                className="px-3 py-2 text-xs border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Azul Corporativo
+              </button>
+              <button
+                type="button"
+                onClick={() => setSettings({
+                  ...settings,
+                  footerBackgroundColor: '#7C2D12',
+                  footerTextColor: '#FEF3C7',
+                  footerTitleColor: '#FFFFFF'
+                })}
+                className="px-3 py-2 text-xs border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Marrón Elegante
+              </button>
             </div>
           </div>
         </div>
