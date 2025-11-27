@@ -32,13 +32,13 @@ const storeConfigService = {
     }
   },
 
-  // Actualizar configuración (incluye logo)
-  updateConfig: async (configData, logoFile = null) => {
+  // Actualizar configuración (incluye logo y banner)
+  updateConfig: async (configData, logoFile = null, bannerFile = null) => {
     try {
       let data = configData;
       
-      // Si hay archivo de logo, usar FormData
-      if (logoFile) {
+      // Si hay archivos, usar FormData
+      if (logoFile || bannerFile) {
         const formData = new FormData();
         
         // Agregar todos los campos del configData
@@ -46,8 +46,14 @@ const storeConfigService = {
           formData.append(key, configData[key]);
         });
         
-        // Agregar el archivo de logo
-        formData.append('logo', logoFile);
+        // Agregar archivos si existen
+        if (logoFile) {
+          formData.append('logo', logoFile);
+        }
+        
+        if (bannerFile) {
+          formData.append('banner_image', bannerFile);
+        }
         
         data = formData;
       }
@@ -77,6 +83,8 @@ const storeConfigService = {
       shipping_cost: parseFloat(formData.shippingCost),
       free_shipping_min: parseFloat(formData.freeShippingMin),
       tax_rate: parseFloat(formData.taxRate),
+      banner_type: formData.bannerType,
+      banner_color: formData.bannerColor,
     };
   },
 
@@ -98,6 +106,9 @@ const storeConfigService = {
       freeShippingMin: apiData.free_shipping_min || 0,
       taxRate: apiData.tax_rate || 0,
       logoUrl: apiData.logo_url || apiData.logo || null,
+      bannerType: apiData.banner_type || 'color',
+      bannerColor: apiData.banner_color || '#3B82F6',
+      bannerImageUrl: apiData.banner_image_url || apiData.banner_image || null,
     };
   },
 };

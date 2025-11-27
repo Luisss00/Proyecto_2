@@ -28,6 +28,29 @@ class StoreConfiguration(models.Model):
     # Logo de la tienda
     logo = models.ImageField(upload_to='store_logos/', blank=True, null=True)
     
+    # Banner de la tienda
+    BANNER_TYPES = [
+        ('color', 'Color de Fondo'),
+        ('image', 'Imagen Personalizada'),
+    ]
+    
+    banner_type = models.CharField(
+        max_length=10, 
+        choices=BANNER_TYPES, 
+        default='color'
+    )
+    banner_color = models.CharField(
+        max_length=7, 
+        default='#3B82F6',
+        help_text='Código de color hexadecimal (ej: #3B82F6)'
+    )
+    banner_image = models.ImageField(
+        upload_to='store_banners/', 
+        blank=True, 
+        null=True,
+        help_text='Imagen para el banner (máx 5MB)'
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

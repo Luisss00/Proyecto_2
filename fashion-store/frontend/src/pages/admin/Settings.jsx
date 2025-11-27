@@ -20,12 +20,17 @@ const AdminSettings = () => {
     freeShippingMin: 100000,
     taxRate: 19,
     logoUrl: null,
+    bannerType: 'color',
+    bannerColor: '#3B82F6',
+    bannerImageUrl: null,
   });
 
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
+  const [bannerFile, setBannerFile] = useState(null);
+  const [bannerPreview, setBannerPreview] = useState(null);
 
   // Cargar configuración inicial
   useEffect(() => {
@@ -87,20 +92,69 @@ const AdminSettings = () => {
     setLogoPreview(null);
   };
 
+  const handleBannerChange = (e) => {
+    const file = e.target.files[0];
+    
+    if (file) {
+      // Validar tipo de archivo
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        toast.error('Solo se permiten archivos de imagen (JPEG, PNG, WebP)');
+        return;
+      }
+      
+      // Validar tamaño (5MB)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast.error('El archivo no puede ser mayor a 5MB');
+        return;
+      }
+      
+      setBannerFile(file);
+      
+      // Crear preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBannerPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeBanner = () => {
+    setBannerFile(null);
+    setBannerPreview(null);
+  };
+
+  const validateColor = (color) => {
+    const hexPattern = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+    return hexPattern.test(color);
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     setLoading(true);
+    
     try {
+      // Validar color si está en modo color
+      if (settings.bannerType === 'color' && !validateColor(settings.bannerColor)) {
+        toast.error('Por favor ingresa un código de color válido (ej: #3B82F6)');
+        setLoading(false);
+        return;
+      }
+      
       const apiData = storeConfigService.formatFormData(settings);
-      const updatedConfig = await storeConfigService.updateConfig(apiData, logoFile);
+      const updatedConfig = await storeConfigService.updateConfig(apiData, logoFile, bannerFile);
       
       // Actualizar el estado local con los datos actualizados
       const formData = storeConfigService.formatApiToForm(updatedConfig);
       setSettings(formData);
       
-      // Limpiar el logo temporal
+      // Limpiar archivos temporales
       setLogoFile(null);
       setLogoPreview(null);
+      setBannerFile(null);
+      setBannerPreview(null);
       
       toast.success('Configuración guardada exitosamente');
     } catch (error) {
@@ -255,6 +309,134 @@ const AdminSettings = () => {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <h2 className="text-xl font-semibold mb-6">Banner de la Tienda</h2>
+          
+          {/* Tipo de Banner */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">Tipo de Banner</label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="bannerType"
+                  value="color"
+                  checked={settings.bannerType === 'color'}
+                  onChange={handleChange}
+                  className="w-4 h-4"
+                />
+                <span>Color de Fondo</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="bannerType"
+                  value="image"
+                  checked={settings.bannerType === 'image'}
+                  onChange={handleChange}
+                  className="w-4 h-4"
+                />
+                <span>Imagen Personalizada</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Vista Previa del Banner */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Vista Previa</label>
+            <div className="relative h-40 bg-gray-100 rounded-lg overflow-hidden">
+              {settings.bannerType === 'color' ? (
+                <div 
+                  className="w-full h-full flex items-center justify-center text-white font-bold text-lg"
+                  style={{ backgroundColor: settings.bannerColor }}
+                >
+                  Vista Previa del Banner - {settings.storeName}
+                </div>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                  {bannerPreview || settings.bannerImageUrl ? (
+                    <img 
+                      src={bannerPreview || settings.bannerImageUrl} 
+                      alt="Vista previa del banner"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="text-center">
+                      <SettingsIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-500">Selecciona una imagen para el banner</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Controles del Banner */}
+          <div className="flex items-center gap-6">
+            {settings.bannerType === 'color' ? (
+              <div className="flex items-center gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Color de Fondo</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      name="bannerColor"
+                      value={settings.bannerColor}
+                      onChange={handleChange}
+                      className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      name="bannerColor"
+                      value={settings.bannerColor}
+                      onChange={handleChange}
+                      placeholder="#3B82F6"
+                      className="input-field flex-1"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Código hexadecimal del color</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1">
+                {!bannerFile ? (
+                  <div>
+                    <label htmlFor="banner-upload" className="btn-secondary flex items-center gap-2 cursor-pointer inline-block">
+                      <Upload className="h-5 w-5" />
+                      {settings.bannerImageUrl ? 'Cambiar Imagen' : 'Subir Imagen'}
+                    </label>
+                    <input
+                      id="banner-upload"
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      onChange={handleBannerChange}
+                      className="hidden"
+                    />
+                    <p className="text-sm text-gray-500 mt-2">PNG, JPG, WebP. Max 5MB</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm text-green-600 mb-2">✅ {bannerFile.name} seleccionado</p>
+                    <button 
+                      type="button" 
+                      onClick={removeBanner}
+                      className="btn-secondary text-red-600 border-red-300 hover:bg-red-50"
+                    >
+                      Remover Imagen
+                    </button>
+                  </div>
+                )}
+                
+                {settings.bannerImageUrl && !bannerFile && (
+                  <div className="mt-2">
+                    <p className="text-xs text-gray-500">Imagen actual: {settings.bannerImageUrl.split('/').pop()}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

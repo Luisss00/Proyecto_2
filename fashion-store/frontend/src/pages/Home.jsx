@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { productService, categoryService } from '../services/api';
+import storeConfigService from '../services/storeConfig';
 import ProductCard from '../components/ProductCard';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -11,6 +12,12 @@ const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [storeConfig, setStoreConfig] = useState({
+    store_name: 'Fashion Store',
+    banner_type: 'color',
+    banner_color: '#3B82F6',
+    banner_image_url: null,
+  });
   const { addItem } = useCart();
   const { isAuthenticated, isCliente } = useAuth();
 
@@ -20,14 +27,16 @@ const Home = () => {
 
   const fetchData = async () => {
     try {
-      const [productsData, categoriesData] = await Promise.all([
+      const [productsData, categoriesData, configData] = await Promise.all([
         productService.getFeatured(),
         categoryService.getAll(),
+        storeConfigService.getPublicConfig(),
       ]);
       
       // ✅ Validar que sean arrays
       setFeaturedProducts(Array.isArray(productsData) ? productsData : []);
       setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+      setStoreConfig(configData);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Error al cargar los productos');
@@ -72,21 +81,35 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-primary-600 to-primary-700 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Banner Dinámico */}
+      <section className="relative text-white py-20">
+        {storeConfig.banner_type === 'image' && storeConfig.banner_image_url ? (
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${storeConfig.banner_image_url})` }}
+          >
+            <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+          </div>
+        ) : (
+          <div 
+            className="absolute inset-0"
+            style={{ backgroundColor: storeConfig.banner_color }}
+          ></div>
+        )}
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
-              Bienvenido a Fashion Store
+              Bienvenido a {storeConfig.store_name}
             </h1>
             <p className="text-xl md:text-2xl mb-8">
               Las mejores tendencias en moda al mejor precio
             </p>
             <div className="flex justify-center gap-4">
-              <Link to="/productos" className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+              <Link to="/productos" className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
                 Ver Productos
               </Link>
-              <Link to="/ofertas" className="bg-transparent border-2 border-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary-600 transition">
+              <Link to="/ofertas" className="bg-transparent border-2 border-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition">
                 Ver Ofertas
               </Link>
             </div>

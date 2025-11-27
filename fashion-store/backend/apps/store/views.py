@@ -67,6 +67,9 @@ def get_public_config(request):
             'instagram_url': config.instagram_url,
             'twitter_url': config.twitter_url,
             'logo': config.logo.url if config.logo else None,
+            'banner_type': config.banner_type,
+            'banner_color': config.banner_color,
+            'banner_image': config.banner_image.url if config.banner_image else None,
         }
         
         # Construir URL completa si el logo existe
@@ -75,6 +78,13 @@ def get_public_config(request):
                 public_data['logo_url'] = request.build_absolute_uri(public_data['logo'])
             else:
                 public_data['logo_url'] = public_data['logo']
+        
+        # Construir URL completa si la imagen del banner existe
+        if public_data['banner_image']:
+            if request:
+                public_data['banner_image_url'] = request.build_absolute_uri(public_data['banner_image'])
+            else:
+                public_data['banner_image_url'] = public_data['banner_image']
         
         return Response(public_data)
     except Exception as e:
