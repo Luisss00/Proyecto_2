@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from .models import StoreConfiguration
 from .serializers import StoreConfigurationSerializer
 
@@ -11,6 +12,7 @@ class StoreConfigurationView(APIView):
     Vista para obtener y actualizar la configuración de la tienda
     """
     permission_classes = [AllowAny]  # Permitir acceso público para lectura
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     
     def get(self, request):
         """
@@ -64,7 +66,16 @@ def get_public_config(request):
             'facebook_url': config.facebook_url,
             'instagram_url': config.instagram_url,
             'twitter_url': config.twitter_url,
+            'logo': config.logo.url if config.logo else None,
         }
+        
+        # Construir URL completa si el logo existe
+        if public_data['logo']:
+            if request:
+                public_data['logo_url'] = request.build_absolute_uri(public_data['logo'])
+            else:
+                public_data['logo_url'] = public_data['logo']
+        
         return Response(public_data)
     except Exception as e:
         return Response(

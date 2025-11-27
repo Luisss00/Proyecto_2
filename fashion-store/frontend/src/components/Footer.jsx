@@ -95,8 +95,20 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo y descripción */}
           <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <Package className="h-8 w-8 text-primary-600" />
+            <div className="flex items-center space-x-3 mb-4">
+              {config?.logo_url || config?.logo ? (
+                <img 
+                  src={config.logo_url || config.logo} 
+                  alt={config.store_name}
+                  className="h-16 w-16 object-contain"
+                  onError={(e) => {
+                    // Si hay error cargando la imagen, usar icono por defecto
+                    e.target.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <Package className="h-16 w-16 text-primary-600" />
+              )}
               <span className="text-xl font-bold text-white">{config?.store_name || 'Fashion Store'}</span>
             </div>
             <p className="text-sm">

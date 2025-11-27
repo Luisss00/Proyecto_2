@@ -19,10 +19,13 @@ const AdminSettings = () => {
     shippingCost: 15000,
     freeShippingMin: 100000,
     taxRate: 19,
+    logoUrl: null,
   });
 
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
 
   // Cargar configuración inicial
   useEffect(() => {
@@ -50,12 +53,55 @@ const AdminSettings = () => {
     });
   };
 
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    
+    if (file) {
+      // Validar tipo de archivo
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        toast.error('Solo se permiten archivos de imagen (JPEG, PNG, WebP)');
+        return;
+      }
+      
+      // Validar tamaño (2MB)
+      const maxSize = 2 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast.error('El archivo no puede ser mayor a 2MB');
+        return;
+      }
+      
+      setLogoFile(file);
+      
+      // Crear preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const apiData = storeConfigService.formatFormData(settings);
-      await storeConfigService.updateConfig(apiData);
+      const updatedConfig = await storeConfigService.updateConfig(apiData, logoFile);
+      
+      // Actualizar el estado local con los datos actualizados
+      const formData = storeConfigService.formatApiToForm(updatedConfig);
+      setSettings(formData);
+      
+      // Limpiar el logo temporal
+      setLogoFile(null);
+      setLogoPreview(null);
+      
       toast.success('Configuración guardada exitosamente');
     } catch (error) {
       console.error('Error al guardar configuración:', error);
@@ -160,15 +206,54 @@ const AdminSettings = () => {
         <div className="card">
           <h2 className="text-xl font-semibold mb-6">Logo de la Tienda</h2>
           <div className="flex items-center gap-6">
-            <div className="w-32 h-32 bg-gray-200 rounded-lg flex items-center justify-center">
-              <SettingsIcon className="h-12 w-12 text-gray-400" />
+            {/* Preview del Logo */}
+            <div className="w-32 h-32 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+              {logoPreview || settings.logoUrl ? (
+                <img 
+                  src={logoPreview || settings.logoUrl} 
+                  alt="Logo de la tienda" 
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <SettingsIcon className="h-12 w-12 text-gray-400" />
+              )}
             </div>
-            <div>
-              <button type="button" className="btn-secondary flex items-center gap-2">
-                <Upload className="h-5 w-5" />
-                Subir Logo
-              </button>
-              <p className="text-sm text-gray-500 mt-2">PNG, JPG. Max 2MB</p>
+            
+            {/* Controles de Logo */}
+            <div className="flex-1">
+              {!logoFile ? (
+                <div>
+                  <label htmlFor="logo-upload" className="btn-secondary flex items-center gap-2 cursor-pointer inline-block">
+                    <Upload className="h-5 w-5" />
+                    {settings.logoUrl ? 'Cambiar Logo' : 'Subir Logo'}
+                  </label>
+                  <input
+                    id="logo-upload"
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={handleLogoChange}
+                    className="hidden"
+                  />
+                  <p className="text-sm text-gray-500 mt-2">PNG, JPG, WebP. Max 2MB</p>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-sm text-green-600 mb-2">✅ {logoFile.name} seleccionado</p>
+                  <button 
+                    type="button" 
+                    onClick={removeLogo}
+                    className="btn-secondary text-red-600 border-red-300 hover:bg-red-50"
+                  >
+                    Remover Logo
+                  </button>
+                </div>
+              )}
+              
+              {settings.logoUrl && !logoFile && (
+                <div className="mt-2">
+                  <p className="text-xs text-gray-500">Logo actual: {settings.logoUrl.split('/').pop()}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

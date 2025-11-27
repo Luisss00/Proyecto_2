@@ -2,13 +2,18 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { ShoppingCart, User, LogOut, Home, Package, BarChart3, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import storeConfigService from '../services/storeConfig';
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const { itemsCount } = useCart();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [storeConfig, setStoreConfig] = useState({
+    store_name: 'Fashion Store',
+    logo_url: null,
+  });
 
   const handleLogout = () => {
     logout();
@@ -21,15 +26,46 @@ const Navbar = () => {
     return '/';
   };
 
+  // Cargar configuración de la tienda
+  useEffect(() => {
+    const loadStoreConfig = async () => {
+      try {
+        const config = await storeConfigService.getPublicConfig();
+        setStoreConfig(config);
+      } catch (error) {
+        console.error('Error al cargar configuración de tienda:', error);
+        // Usar valores por defecto en caso de error
+        setStoreConfig({
+          store_name: 'Fashion Store',
+          logo_url: null,
+        });
+      }
+    };
+
+    loadStoreConfig();
+  }, []);
+
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <Package className="h-8 w-8 text-primary-600" />
+          <Link to="/" className="flex items-center space-x-3">
+            {storeConfig.logo_url || storeConfig.logo ? (
+              <img 
+                src={storeConfig.logo_url || storeConfig.logo} 
+                alt={storeConfig.store_name}
+                className="h-12 w-12 object-contain"
+                onError={(e) => {
+                  // Si hay error cargando la imagen, usar icono por defecto
+                  e.target.style.display = 'none';
+                }}
+              />
+            ) : (
+              <Package className="h-12 w-12 text-primary-600" />
+            )}
             <span className="text-xl font-bold text-gray-900 dark:text-white">
-              Fashion Store
+              {storeConfig.store_name}
             </span>
           </Link>
 

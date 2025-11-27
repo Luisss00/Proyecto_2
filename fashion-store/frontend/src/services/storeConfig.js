@@ -32,10 +32,27 @@ const storeConfigService = {
     }
   },
 
-  // Actualizar configuración
-  updateConfig: async (configData) => {
+  // Actualizar configuración (incluye logo)
+  updateConfig: async (configData, logoFile = null) => {
     try {
-      const response = await api.post('/store/config/', configData);
+      let data = configData;
+      
+      // Si hay archivo de logo, usar FormData
+      if (logoFile) {
+        const formData = new FormData();
+        
+        // Agregar todos los campos del configData
+        Object.keys(configData).forEach(key => {
+          formData.append(key, configData[key]);
+        });
+        
+        // Agregar el archivo de logo
+        formData.append('logo', logoFile);
+        
+        data = formData;
+      }
+      
+      const response = await api.post('/store/config/', data);
       return response.data;
     } catch (error) {
       console.error('Error al actualizar configuración:', error);
@@ -80,6 +97,7 @@ const storeConfigService = {
       shippingCost: apiData.shipping_cost || 0,
       freeShippingMin: apiData.free_shipping_min || 0,
       taxRate: apiData.tax_rate || 0,
+      logoUrl: apiData.logo_url || apiData.logo || null,
     };
   },
 };
