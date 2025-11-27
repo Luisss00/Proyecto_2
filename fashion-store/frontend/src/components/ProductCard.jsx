@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Eye } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import FavoriteButton from './FavoriteButton';
 
 const ProductCard = ({ product, onAddToCart }) => {
   const { isCliente } = useAuth();
@@ -43,6 +44,13 @@ const ProductCard = ({ product, onAddToCart }) => {
           >
             <Eye className="h-5 w-5" />
           </Link>
+          
+          <FavoriteButton 
+            productId={product.id}
+            className="bg-white p-2 rounded-full hover:bg-primary-600 hover:text-white transition"
+            size="default"
+          />
+          
           {isCliente && product.stock > 0 && (
             <button
               onClick={() => onAddToCart(product)}

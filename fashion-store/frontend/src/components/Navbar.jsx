@@ -1,13 +1,15 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { ShoppingCart, User, LogOut, Home, Package, BarChart3, Menu, X } from 'lucide-react';
+import { useFavorites } from '../contexts/FavoritesContext';
+import { ShoppingCart, Heart, User, LogOut, Home, Package, BarChart3, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import storeConfigService from '../services/storeConfig';
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const { itemsCount } = useCart();
+  const { count: favoritesCount } = useFavorites();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [storeConfig, setStoreConfig] = useState({
@@ -85,14 +87,26 @@ const Navbar = () => {
               <>
                 {/* Carrito */}
                 {user?.role === 'cliente' && (
-                  <Link to="/carrito" className="relative">
-                    <ShoppingCart className="h-6 w-6 text-gray-700 dark:text-gray-300 hover:text-primary-600 transition" />
-                    {itemsCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                        {itemsCount}
-                      </span>
-                    )}
-                  </Link>
+                  <>
+                    <Link to="/carrito" className="relative">
+                      <ShoppingCart className="h-6 w-6 text-gray-700 dark:text-gray-300 hover:text-primary-600 transition" />
+                      {itemsCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                          {itemsCount}
+                        </span>
+                      )}
+                    </Link>
+                    
+                    {/* Favoritos */}
+                    <Link to="/cliente/favoritos" className="relative">
+                      <Heart className="h-6 w-6 text-gray-700 dark:text-gray-300 hover:text-red-500 transition" />
+                      {favoritesCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                          {favoritesCount}
+                        </span>
+                      )}
+                    </Link>
+                  </>
                 )}
 
                 {/* Dashboard/Perfil */}
@@ -154,9 +168,14 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 {user?.role === 'cliente' && (
-                  <Link to="/carrito" className="block text-gray-700 dark:text-gray-300 hover:text-primary-600">
-                    Carrito ({itemsCount})
-                  </Link>
+                  <>
+                    <Link to="/carrito" className="block text-gray-700 dark:text-gray-300 hover:text-primary-600">
+                      Carrito ({itemsCount})
+                    </Link>
+                    <Link to="/cliente/favoritos" className="block text-gray-700 dark:text-gray-300 hover:text-red-500">
+                      Favoritos ({favoritesCount})
+                    </Link>
+                  </>
                 )}
                 <Link 
                   to={getDashboardLink()} 

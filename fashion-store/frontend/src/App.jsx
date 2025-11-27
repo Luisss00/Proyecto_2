@@ -3,6 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
+import { FavoritesProvider } from './contexts/FavoritesContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -43,7 +44,8 @@ function App() {
     <Router>
       <AuthProvider>
         <CartProvider>
-          <Routes>
+          <FavoritesProvider>
+            <Routes>
             {/* ==================== RUTAS PÚBLICAS ==================== */}
             <Route
               path="/*"
@@ -138,6 +140,7 @@ function App() {
             pauseOnHover
             theme="light"
           />
+          </FavoritesProvider>
         </CartProvider>
       </AuthProvider>
     </Router>

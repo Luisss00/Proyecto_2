@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useFavorites } from '../../contexts/FavoritesContext';
 import { useProfileService } from '../../services/profileService';
 import ProfileInputField from '../../components/ProfileInputField';
 import SaveConfirmation from '../../components/SaveConfirmation';
 import SyncStatus from '../../components/SyncStatus';
-import { User, Mail, Phone, MapPin, Save, Edit, Camera, Shield, AlertTriangle } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Save, Edit, Camera, Shield, AlertTriangle, Heart, Eye, ShoppingCart } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 // Hook de validación optimizado
@@ -98,6 +100,7 @@ const useProfileValidation = (formData, editing) => {
 
 const OptimizedClienteProfile = () => {
   const { user, updateUser } = useAuth();
+  const { favorites, count } = useFavorites();
   const { getProfile, updateProfile, syncWithBackend } = useProfileService();
   
   // Estados principales optimizados
@@ -356,6 +359,72 @@ const OptimizedClienteProfile = () => {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Sección de Favoritos */}
+      <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-xl shadow-sm p-6 border border-red-100 dark:border-red-800">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-red-100 dark:bg-red-900 p-2 rounded-full">
+              <Heart className="h-6 w-6 text-red-600 dark:text-red-400" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                Mis Favoritos
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                {count} {count === 1 ? 'producto guardado' : 'productos guardados'}
+              </p>
+            </div>
+          </div>
+          
+          <Link 
+            to="/cliente/favoritos"
+            className="btn-primary flex items-center gap-2 px-4 py-2"
+          >
+            <Eye className="h-4 w-4" />
+            Ver todos
+          </Link>
+        </div>
+
+        {favorites.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {favorites.slice(0, 4).map((favorite) => {
+              const product = favorite.product;
+              return (
+                <div key={favorite.id} className="group relative">
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
+                    <img
+                      src={product.primary_image || 'https://via.placeholder.com/150'}
+                      alt={product.name}
+                      className="w-full h-24 object-cover rounded-md mb-2 group-hover:scale-105 transition-transform duration-200"
+                    />
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-1">
+                      {product.name}
+                    </h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      ${product.final_price || product.price}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <Heart className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
+              Aún no tienes productos favoritos
+            </p>
+            <Link 
+              to="/productos"
+              className="btn-secondary inline-flex items-center gap-2"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              Explorar productos
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Advertencias */}

@@ -270,4 +270,39 @@ export const userService = {
   },
 };
 
+// ==================== FAVORITES SERVICES ====================
+export const favoritesService = {
+  getAll: async () => {
+    const response = await api.get('/favorites/favorites/');
+    return response.data;
+  },
+  
+  add: async (productId) => {
+    const response = await api.post('/favorites/favorites/', { product_id: productId });
+    return response.data;
+  },
+  
+  remove: async (favoriteId) => {
+    const response = await api.delete(`/favorites/favorites/${favoriteId}/`);
+    return response.data;
+  },
+  
+  toggle: async (productId) => {
+    const response = await api.post('/favorites/favorites/toggle/', { product_id: productId });
+    return response.data;
+  },
+  
+  checkFavorite: async (productId) => {
+    const response = await api.get('/favorites/favorites/check_favorite/', { 
+      params: { product_id: productId } 
+    });
+    return response.data;
+  },
+  
+  getCount: async () => {
+    const response = await api.get('/favorites/favorites/count/');
+    return response.data;
+  },
+};
+
 export default api;
