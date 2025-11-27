@@ -1,0 +1,44 @@
+# ===== DJANGO =====
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+
+# Archivos de migraciones que son basura si son "__pycache__"
+migrations/**/__pycache__/
+migrations/*.pyc
+
+# Entorno virtual
+.venv/
+venv/
+env/
+
+# Media (archivos subidos por usuarios)
+media/
+
+# Archivos de configuración sensibles
+.env
+*.env
+
+# Archivos de logs
+*.log
+
+# ===== DJANGO STATIC =====
+staticfiles/
+static/
+
+# ===== REACT + VITE =====
+node_modules/
+dist/
+.vite/
+*.local
+
+# ===== EDITORES =====
+.vscode/
+.idea/
+
+# ===== SISTEMA =====
+.DS_Store
+Thumbs.db
