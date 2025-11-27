@@ -17,6 +17,11 @@ const Home = () => {
     banner_type: 'color',
     banner_color: '#3B82F6',
     banner_image_url: null,
+    banner_title_text: 'Bienvenido a Fashion Store',
+    banner_subtitle_text: 'Las mejores tendencias en moda al mejor precio',
+    banner_text_color: '#FFFFFF',
+    enable_products_button: true,
+    enable_offers_button: true,
   });
   const { addItem } = useCart();
   const { isAuthenticated, isCliente } = useAuth();
@@ -82,7 +87,7 @@ const Home = () => {
   return (
     <div className="min-h-screen">
       {/* Banner Dinámico */}
-      <section className="relative text-white py-20">
+      <section className="relative py-20">
         {storeConfig.banner_type === 'image' && storeConfig.banner_image_url ? (
           <div 
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -99,19 +104,39 @@ const Home = () => {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">
-              Bienvenido a {storeConfig.store_name}
+            <h1 
+              className="text-4xl md:text-6xl font-bold mb-4"
+              style={{ color: storeConfig.banner_text_color }}
+            >
+              {storeConfig.banner_title_text}
             </h1>
-            <p className="text-xl md:text-2xl mb-8">
-              Las mejores tendencias en moda al mejor precio
+            <p 
+              className="text-xl md:text-2xl mb-8"
+              style={{ color: storeConfig.banner_text_color }}
+            >
+              {storeConfig.banner_subtitle_text}
             </p>
             <div className="flex justify-center gap-4">
-              <Link to="/productos" className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
-                Ver Productos
-              </Link>
-              <Link to="/ofertas" className="bg-transparent border-2 border-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition">
-                Ver Ofertas
-              </Link>
+              {storeConfig.enable_products_button && (
+                <Link 
+                  to="/productos" 
+                  className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+                >
+                  Ver Productos
+                </Link>
+              )}
+              {storeConfig.enable_offers_button && (
+                <Link 
+                  to="/ofertas" 
+                  className="bg-transparent border-2 px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition"
+                  style={{ 
+                    borderColor: storeConfig.banner_text_color,
+                    color: storeConfig.banner_text_color 
+                  }}
+                >
+                  Ver Ofertas
+                </Link>
+              )}
             </div>
           </div>
         </div>

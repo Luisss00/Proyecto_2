@@ -51,6 +51,33 @@ class StoreConfiguration(models.Model):
         help_text='Imagen para el banner (máx 5MB)'
     )
     
+    # Configuración del texto del banner
+    banner_title_text = models.CharField(
+        max_length=255,
+        default='Bienvenido a Fashion Store',
+        help_text='Texto principal del banner'
+    )
+    banner_subtitle_text = models.CharField(
+        max_length=255,
+        default='Las mejores tendencias en moda al mejor precio',
+        help_text='Texto secundario del banner'
+    )
+    banner_text_color = models.CharField(
+        max_length=7,
+        default='#FFFFFF',
+        help_text='Color del texto del banner (código hexadecimal)'
+    )
+    
+    # Configuración de botones del banner
+    enable_products_button = models.BooleanField(
+        default=True,
+        help_text='Mostrar botón de Ver Productos'
+    )
+    enable_offers_button = models.BooleanField(
+        default=True,
+        help_text='Mostrar botón de Ver Ofertas'
+    )
+    
     # Configuración del footer
     footer_background_color = models.CharField(
         max_length=7,

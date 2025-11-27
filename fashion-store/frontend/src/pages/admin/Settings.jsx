@@ -22,6 +22,11 @@ const AdminSettings = () => {
     logoUrl: null,
     bannerType: 'color',
     bannerColor: '#3B82F6',
+    bannerTitleText: 'Bienvenido a Fashion Store',
+    bannerSubtitleText: 'Las mejores tendencias en moda al mejor precio',
+    bannerTextColor: '#FFFFFF',
+    enableProductsButton: true,
+    enableOffersButton: true,
     bannerImageUrl: null,
     footerBackgroundColor: '#1F2937',
     footerTextColor: '#D1D5DB',
@@ -140,6 +145,11 @@ const AdminSettings = () => {
     // Validar color del banner
     if (settings.bannerType === 'color' && !validateColor(settings.bannerColor)) {
       errors.push('Banner: Ingresa un código de color válido (ej: #3B82F6)');
+    }
+
+    // Validar color del texto del banner
+    if (!validateColor(settings.bannerTextColor)) {
+      errors.push('Banner: Color del texto inválido');
     }
 
     // Validar colores del footer
@@ -568,22 +578,95 @@ const AdminSettings = () => {
           {/* Vista Previa del Banner */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">Vista Previa</label>
-            <div className="relative h-40 bg-gray-100 rounded-lg overflow-hidden">
+            <div className="relative h-48 bg-gray-100 rounded-lg overflow-hidden">
               {settings.bannerType === 'color' ? (
                 <div 
-                  className="w-full h-full flex items-center justify-center text-white font-bold text-lg"
+                  className="w-full h-full flex items-center justify-center relative"
                   style={{ backgroundColor: settings.bannerColor }}
                 >
-                  Vista Previa del Banner - {settings.storeName}
+                  <div className="text-center">
+                    <h1 
+                      className="text-3xl md:text-4xl font-bold mb-3"
+                      style={{ color: settings.bannerTextColor }}
+                    >
+                      {settings.bannerTitleText}
+                    </h1>
+                    <p 
+                      className="text-lg md:text-xl mb-6"
+                      style={{ color: settings.bannerTextColor }}
+                    >
+                      {settings.bannerSubtitleText}
+                    </p>
+                    <div className="flex justify-center gap-4">
+                      {settings.enableProductsButton && (
+                        <span 
+                          className="px-6 py-2 rounded-lg font-semibold"
+                          style={{ 
+                            backgroundColor: 'white', 
+                            color: settings.bannerColor 
+                          }}
+                        >
+                          Ver Productos
+                        </span>
+                      )}
+                      {settings.enableOffersButton && (
+                        <span 
+                          className="px-6 py-2 rounded-lg font-semibold border-2"
+                          style={{ 
+                            color: settings.bannerTextColor,
+                            borderColor: settings.bannerTextColor
+                          }}
+                        >
+                          Ver Ofertas
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                <div className="w-full h-full flex items-center justify-center bg-gray-200 relative">
                   {bannerPreview || settings.bannerImageUrl ? (
-                    <img 
-                      src={bannerPreview || settings.bannerImageUrl} 
-                      alt="Vista previa del banner"
-                      className="w-full h-full object-cover"
-                    />
+                    <div className="w-full h-full relative">
+                      <img 
+                        src={bannerPreview || settings.bannerImageUrl} 
+                        alt="Vista previa del banner"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <h1 
+                            className="text-3xl md:text-4xl font-bold mb-3"
+                            style={{ color: settings.bannerTextColor }}
+                          >
+                            {settings.bannerTitleText}
+                          </h1>
+                          <p 
+                            className="text-lg md:text-xl mb-6"
+                            style={{ color: settings.bannerTextColor }}
+                          >
+                            {settings.bannerSubtitleText}
+                          </p>
+                          <div className="flex justify-center gap-4">
+                            {settings.enableProductsButton && (
+                              <span 
+                                className="px-6 py-2 rounded-lg font-semibold bg-white"
+                                style={{ color: settings.bannerColor }}
+                              >
+                                Ver Productos
+                              </span>
+                            )}
+                            {settings.enableOffersButton && (
+                              <span 
+                                className="px-6 py-2 rounded-lg font-semibold border-2 text-white"
+                                style={{ borderColor: settings.bannerTextColor }}
+                              >
+                                Ver Ofertas
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
                     <div className="text-center">
                       <SettingsIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
@@ -592,6 +675,105 @@ const AdminSettings = () => {
                   )}
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Configuración del Texto del Banner */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Texto Principal del Banner
+              </label>
+              <input
+                type="text"
+                name="bannerTitleText"
+                value={settings.bannerTitleText}
+                onChange={handleChange}
+                placeholder="Bienvenido a Fashion Store"
+                className="input-field"
+              />
+              <p className="text-xs text-gray-500 mt-1">Título principal que aparece en el banner</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Texto Secundario del Banner
+              </label>
+              <input
+                type="text"
+                name="bannerSubtitleText"
+                value={settings.bannerSubtitleText}
+                onChange={handleChange}
+                placeholder="Las mejores tendencias en moda al mejor precio"
+                className="input-field"
+              />
+              <p className="text-xs text-gray-500 mt-1">Descripción que aparece debajo del título</p>
+            </div>
+          </div>
+
+          {/* Configuración del Color del Texto */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Color del Texto del Banner
+            </label>
+            <div className="flex items-center gap-4">
+              <div>
+                <label className="block text-xs text-gray-600 mb-2">Color del Texto</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    name="bannerTextColor"
+                    value={settings.bannerTextColor}
+                    onChange={handleChange}
+                    className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    name="bannerTextColor"
+                    value={settings.bannerTextColor}
+                    onChange={handleChange}
+                    placeholder="#FFFFFF"
+                    className="input-field"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Color del texto principal y secundario</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Configuración de Botones */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Botones del Banner
+            </label>
+            <div className="space-y-3">
+              <label className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  name="enableProductsButton"
+                  checked={settings.enableProductsButton}
+                  onChange={handleChange}
+                  className="w-5 h-5"
+                />
+                <div>
+                  <p className="font-medium">Mostrar Botón "Ver Productos"</p>
+                  <p className="text-sm text-gray-500">Habilita el botón que lleva a la página de productos</p>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  name="enableOffersButton"
+                  checked={settings.enableOffersButton}
+                  onChange={handleChange}
+                  className="w-5 h-5"
+                />
+                <div>
+                  <p className="font-medium">Mostrar Botón "Ver Ofertas"</p>
+                  <p className="text-sm text-gray-500">Habilita el botón que lleva a la página de ofertas</p>
+                </div>
+              </label>
             </div>
           </div>
 
