@@ -37,13 +37,19 @@ const Checkout = () => {
     setLoading(true);
 
     try {
-      const order = await orderService.create(formData);
+      // Preparar datos con los items del carrito
+      const orderData = {
+        ...formData,
+        items: cart.items.map(item => ({
+          product_id: item.product.id,
+          quantity: item.quantity,
+          size: item.size,
+          color: item.color || ''
+        }))
+      };
       
-      // Procesar pago si es contra entrega
-      if (formData.payment_method === 'contra_entrega') {
-        await orderService.processPayment(order.id);
-      }
-
+      const order = await orderService.create(orderData);
+      
       toast.success('¡Pedido realizado con éxito!');
       await clearCart();
       navigate(`/cliente/pedidos`);

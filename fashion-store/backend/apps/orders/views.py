@@ -53,6 +53,13 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def my_orders(self, request):
+        """Obtener órdenes del usuario actual (cliente)"""
+        user_orders = Order.objects.filter(user=request.user).select_related('user').prefetch_related('items__product')
+        serializer = OrderSerializer(user_orders, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def statistics(self, request):
         """Estadísticas generales de pedidos (solo admin)"""
         if request.user.role != 'administrador':

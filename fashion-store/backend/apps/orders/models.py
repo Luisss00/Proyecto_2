@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+from decimal import Decimal
 from apps.users.models import User
 from apps.products.models import Product
 
@@ -46,6 +48,31 @@ class Order(models.Model):
     
     def __str__(self):
         return f"Order {self.order_number} - {self.user.username}"
+    
+    def calculate_totals(self):
+        """Calcular subtotal, tax y total de la orden"""
+        # Calcular subtotal desde los items
+        self.subtotal = sum(item.subtotal for item in self.items.all())
+        
+        # Calcular tax (IVA 19%) - usar Decimal para evitar errores de tipos
+        self.tax = self.subtotal * Decimal('0.19')
+        
+        # Calcular total
+        self.total = self.subtotal + self.shipping_cost + self.tax
+        
+        self.save(update_fields=['subtotal', 'tax', 'total'])
+    
+    def save(self, *args, **kwargs):
+        """Override save to generate order_number if not exists"""
+        if not self.order_number:
+            # Generar número de orden único
+            timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
+            import random
+            import string
+            random_suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+            self.order_number = f"ORD-{timestamp}-{random_suffix}"
+        
+        super().save(*args, **kwargs)
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')

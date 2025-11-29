@@ -66,9 +66,14 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         items_data = validated_data.pop('items')
         
-        # Crear la orden
+        # Crear la orden con valores por defecto
+        shipping_cost = 15000  # Costo de envío fijo
+        
         order = Order.objects.create(
-            user=self.context['request'].user,
+            subtotal=0,  # Se calculará después
+            tax=0,       # Se calculará después
+            total=0,     # Se calculará después
+            shipping_cost=shipping_cost,
             **validated_data
         )
         
@@ -91,7 +96,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             product.stock -= item_data['quantity']
             product.save()
         
-        # Calcular totales
+        # Calcular totales después de crear todos los items
         order.calculate_totals()
         
         return order    
