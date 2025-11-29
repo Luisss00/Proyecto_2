@@ -51,11 +51,23 @@ const AdminOrders = () => {
   };
 
   const formatPrice = (price) => {
+    // Validar y sanitizar el precio
+    const numPrice = Number(price);
+    
+    // Si es NaN, null, undefined o no es un número válido, devolver $0
+    if (isNaN(numPrice) || numPrice === null || numPrice === undefined) {
+      return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0,
+      }).format(0);
+    }
+    
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
       currency: 'COP',
       minimumFractionDigits: 0,
-    }).format(price);
+    }).format(numPrice);
   };
 
   const filteredOrders = orders.filter((order) => {
@@ -64,9 +76,21 @@ const AdminOrders = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const openOrderDetails = (order) => {
-    setSelectedOrder(order);
-    setShowModal(true);
+  const openOrderDetails = async (order) => {
+    try {
+      setLoading(true);
+      const detailedOrder = await orderService.getById(order.id);
+      setSelectedOrder(detailedOrder);
+      setShowModal(true);
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+      toast.error('Error al cargar detalles del pedido');
+      // Fallback: usar los datos básicos si falla la carga completa
+      setSelectedOrder(order);
+      setShowModal(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
@@ -242,7 +266,17 @@ const AdminOrders = () => {
         </table>
       </div>
 
-      {showModal && selectedOrder && (
+      {showModal && (
+        loading && selectedOrder === null ? (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-8">
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+                <span className="ml-4 text-lg">Cargando detalles del pedido...</span>
+              </div>
+            </div>
+          </div>
+        ) : selectedOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-3xl w-full max-h-screen overflow-y-auto">
             <div className="p-6">
@@ -269,26 +303,38 @@ const AdminOrders = () => {
 
                 <div className="border-t pt-4">
                   <h3 className="font-semibold mb-2">Información de Envío</h3>
-                  <p className="text-sm text-gray-600">{selectedOrder.shipping_address}</p>
-                  <p className="text-sm text-gray-600">{selectedOrder.shipping_city}</p>
-                  <p className="text-sm text-gray-600">Tel: {selectedOrder.shipping_phone}</p>
+                  <p className="text-sm text-gray-600">{selectedOrder.shipping_address || 'No especificada'}</p>
+                  <p className="text-sm text-gray-600">{selectedOrder.shipping_city || 'No especificada'}</p>
+                  <p className="text-sm text-gray-600">Tel: {selectedOrder.shipping_phone || 'No especificado'}</p>
+                  <p className="text-sm text-gray-600">Método de pago: {selectedOrder.payment_method || 'No especificado'}</p>
+                  <p className="text-sm text-gray-600">Estado: {selectedOrder.status || 'No especificado'}</p>
                 </div>
 
                 <div className="border-t pt-4">
                   <h3 className="font-semibold mb-2">Productos</h3>
-                  <div className="space-y-2">
-                    {selectedOrder.items?.map((item) => (
-                      <div key={item.id} className="flex justify-between p-2 bg-gray-50 rounded">
-                        <div>
-                          <p className="font-medium">{item.product?.name}</p>
-                          <p className="text-sm text-gray-600">
-                            Talla: {item.size} | Cantidad: {item.quantity}
-                          </p>
+                  {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                    <div className="space-y-2">
+                      {selectedOrder.items.map((item) => (
+                        <div key={item.id} className="flex justify-between p-2 bg-gray-50 rounded">
+                          <div>
+                            <p className="font-medium">{item.product?.name || 'Producto eliminado'}</p>
+                            <p className="text-sm text-gray-600">
+                              {item.size && `Talla: ${item.size} | `}Cantidad: {item.quantity || 1}
+                              {item.color && ` | Color: ${item.color}`}
+                            </p>
+                            {item.price && (
+                              <p className="text-sm text-gray-600">
+                                Precio unitario: {formatPrice(item.price)}
+                              </p>
+                            )}
+                          </div>
+                          <p className="font-semibold">{formatPrice(item.subtotal)}</p>
                         </div>
-                        <p className="font-semibold">{formatPrice(item.subtotal)}</p>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No hay productos en este pedido</p>
+                  )}
                 </div>
 
                 <div className="border-t pt-4">
@@ -321,6 +367,7 @@ const AdminOrders = () => {
             </div>
           </div>
         </div>
+        )
       )}
     </div>
   );

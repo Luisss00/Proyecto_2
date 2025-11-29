@@ -7,6 +7,7 @@ const ClienteOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState({});
 
   useEffect(() => {
     fetchOrders();
@@ -63,15 +64,57 @@ const ClienteOrders = () => {
   };
 
   const formatPrice = (price) => {
+    // Validar y sanitizar el precio
+    const numPrice = Number(price);
+    
+    // Si es NaN, null, undefined o no es un número válido, devolver $0
+    if (isNaN(numPrice) || numPrice === null || numPrice === undefined) {
+      return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0,
+      }).format(0);
+    }
+    
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
       currency: 'COP',
       minimumFractionDigits: 0,
-    }).format(price);
+    }).format(numPrice);
   };
 
-  const toggleOrderDetails = (orderId) => {
-    setExpandedOrder(expandedOrder === orderId ? null : orderId);
+  const toggleOrderDetails = async (orderId) => {
+    if (expandedOrder === orderId) {
+      setExpandedOrder(null);
+      return;
+    }
+    
+    // Si ya tenemos los detalles completos, solo expandir
+    const order = orders.find(o => o.id === orderId);
+    if (order && order.items && order.subtotal !== undefined) {
+      setExpandedOrder(orderId);
+      return;
+    }
+    
+    // Obtener detalles completos
+    try {
+      setLoadingDetails(prev => ({ ...prev, [orderId]: true }));
+      const detailedOrder = await orderService.getById(orderId);
+      
+      // Actualizar la orden en el estado
+      setOrders(prevOrders => 
+        prevOrders.map(o => o.id === orderId ? detailedOrder : o)
+      );
+      
+      setExpandedOrder(orderId);
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+      toast.error('Error al cargar detalles del pedido');
+      // Expandir con datos básicos como fallback
+      setExpandedOrder(orderId);
+    } finally {
+      setLoadingDetails(prev => ({ ...prev, [orderId]: false }));
+    }
   };
 
   if (loading) {
@@ -187,11 +230,16 @@ const ClienteOrders = () => {
                     </div>
                     <button
                       onClick={() => toggleOrderDetails(order.id)}
-                      className="btn-secondary flex items-center gap-2"
+                      disabled={loadingDetails[order.id]}
+                      className="btn-secondary flex items-center gap-2 disabled:opacity-50"
                     >
-                      <Eye className="h-4 w-4" />
-                      {isExpanded ? 'Ocultar' : 'Ver'} Detalles
-                      {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      {loadingDetails[order.id] ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                      {loadingDetails[order.id] ? 'Cargando...' : (isExpanded ? 'Ocultar' : 'Ver')} Detalles
+                      {isExpanded && !loadingDetails[order.id] ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
@@ -208,13 +256,16 @@ const ClienteOrders = () => {
                         </h4>
                         <div className="space-y-2 text-sm">
                           <p className="text-gray-600 dark:text-gray-400">
-                            <strong>Dirección:</strong> {order.shipping_address}
+                            <strong>Dirección:</strong> {order.shipping_address || 'No especificada'}
                           </p>
                           <p className="text-gray-600 dark:text-gray-400">
-                            <strong>Ciudad:</strong> {order.shipping_city}
+                            <strong>Ciudad:</strong> {order.shipping_city || 'No especificada'}
                           </p>
                           <p className="text-gray-600 dark:text-gray-400">
-                            <strong>Teléfono:</strong> {order.shipping_phone}
+                            <strong>Teléfono:</strong> {order.shipping_phone || 'No especificado'}
+                          </p>
+                          <p className="text-gray-600 dark:text-gray-400">
+                            <strong>Método de pago:</strong> {order.payment_method || 'No especificado'}
                           </p>
                         </div>
                       </div>
@@ -250,31 +301,43 @@ const ClienteOrders = () => {
                       <h4 className="font-semibold text-gray-900 dark:text-white mb-3">
                         Productos
                       </h4>
-                      <div className="space-y-3">
-                        {order.items?.map((item) => (
-                          <div
-                            key={item.id}
-                            className="flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg"
-                          >
-                            <img
-                              src={item.product?.primary_image || 'https://via.placeholder.com/80'}
-                              alt={item.product?.name}
-                              className="w-20 h-20 object-cover rounded-lg"
-                            />
-                            <div className="flex-1">
-                              <p className="font-medium text-gray-900 dark:text-white">
-                                {item.product?.name}
-                              </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Talla: {item.size} | Cantidad: {item.quantity}
+                      {order.items && order.items.length > 0 ? (
+                        <div className="space-y-3">
+                          {order.items.map((item) => (
+                            <div
+                              key={item.id}
+                              className="flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg"
+                            >
+                              <img
+                                src={item.product?.primary_image || 'https://via.placeholder.com/80'}
+                                alt={item.product?.name || 'Producto eliminado'}
+                                className="w-20 h-20 object-cover rounded-lg"
+                              />
+                              <div className="flex-1">
+                                <p className="font-medium text-gray-900 dark:text-white">
+                                  {item.product?.name || 'Producto eliminado'}
+                                </p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                  {item.size && `Talla: ${item.size} | `}Cantidad: {item.quantity || 1}
+                                  {item.color && ` | Color: ${item.color}`}
+                                </p>
+                                {item.price && (
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    Precio unitario: {formatPrice(item.price)}
+                                  </p>
+                                )}
+                              </div>
+                              <p className="font-semibold text-gray-900 dark:text-white">
+                                {formatPrice(item.subtotal)}
                               </p>
                             </div>
-                            <p className="font-semibold text-gray-900 dark:text-white">
-                              {formatPrice(item.subtotal || item.price * item.quantity)}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          No hay productos en este pedido
+                        </p>
+                      )}
                     </div>
 
                     {/* Acciones */}

@@ -51,22 +51,34 @@ class Order(models.Model):
     
     def calculate_totals(self):
         """Calcular subtotal, tax y total de la orden"""
-        # Calcular subtotal desde los items (con validación de datos)
-        self.subtotal = sum(
-            (item.subtotal if item.subtotal else Decimal('0.00')) 
-            for item in self.items.all()
-        )
-        
-        # Calcular tax (IVA 19%) - usar Decimal para evitar errores de tipos
-        self.tax = self.subtotal * Decimal('0.19')
-        
-        # Asegurar que shipping_cost no sea None
-        shipping_cost = self.shipping_cost if self.shipping_cost else Decimal('0.00')
-        
-        # Calcular total
-        self.total = self.subtotal + shipping_cost + self.tax
-        
-        self.save(update_fields=['subtotal', 'tax', 'total'])
+        try:
+            # Calcular subtotal desde los items (con validación de datos)
+            subtotal = Decimal('0.00')
+            for item in self.items.all():
+                item_subtotal = item.subtotal if item.subtotal else Decimal('0.00')
+                subtotal += item_subtotal
+            
+            self.subtotal = subtotal
+            
+            # Calcular tax (IVA 19%) - usar Decimal para evitar errores de tipos
+            self.tax = self.subtotal * Decimal('0.19')
+            
+            # Asegurar que shipping_cost no sea None
+            shipping_cost = self.shipping_cost if self.shipping_cost else Decimal('0.00')
+            
+            # Calcular total
+            self.total = self.subtotal + shipping_cost + self.tax
+            
+            # Solo guardar si hay cambios
+            self.save(update_fields=['subtotal', 'tax', 'total'])
+            
+        except Exception as e:
+            print(f"Error calculating totals for order {self.id}: {e}")
+            # Valores por defecto en caso de error
+            self.subtotal = self.subtotal or Decimal('0.00')
+            self.tax = self.tax or Decimal('0.00')
+            self.total = self.total or Decimal('0.00')
+            self.save(update_fields=['subtotal', 'tax', 'total'])
     
     def save(self, *args, **kwargs):
         """Override save to generate order_number if not exists"""
