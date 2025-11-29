@@ -1,5 +1,6 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import storeConfigService from '../../services/storeConfig';
 import { 
   User, 
   ShoppingBag, 
@@ -10,14 +11,51 @@ import {
   Menu,
   X,
   Home,
-  ShoppingCart
+  ShoppingCart,
+  Package
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const ClienteLayout = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [storeConfig, setStoreConfig] = useState(null);
+
+  // Mapeo de rutas a títulos dinámicos
+  const routeTitles = {
+    '/cliente/perfil': 'Mi Perfil',
+    '/cliente/pedidos': 'Mis Pedidos',
+    '/cliente/favoritos': 'Mis Favoritos',
+    '/cliente/direcciones': 'Mis Direcciones',
+    '/cliente/configuracion': 'Configuración',
+  };
+
+  // Obtener título de la página actual
+  const getCurrentPageTitle = () => {
+    const path = location.pathname;
+    return routeTitles[path] || 'Mi Cuenta';
+  };
+
+  // Cargar configuración de la tienda
+  useEffect(() => {
+    const loadStoreConfig = async () => {
+      try {
+        const config = await storeConfigService.getPublicConfig();
+        setStoreConfig(config);
+      } catch (error) {
+        console.error('Error al cargar configuración de tienda:', error);
+        // Usar valores por defecto en caso de error
+        setStoreConfig({
+          store_name: 'Fashion Store',
+          logo: null
+        });
+      }
+    };
+
+    loadStoreConfig();
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -80,10 +118,24 @@ const ClienteLayout = () => {
               </button>
               
               <a href="/" className="flex items-center gap-2">
-                <div className="bg-primary-600 text-white p-2 rounded-lg">
-                  <Home className="h-5 w-5" />
+                <div className="p-2">
+                  {storeConfig?.logo_url || storeConfig?.logo ? (
+                    <img 
+                      src={storeConfig.logo_url || storeConfig.logo} 
+                      alt={storeConfig?.store_name || 'Logo'}
+                      className="h-12 w-12 object-contain"
+                      onError={(e) => {
+                        // Si hay error cargando la imagen, usar icono por defecto
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <Package className="h-12 w-12 text-primary-600" />
+                  )}
                 </div>
-                <span className="font-bold text-xl hidden sm:block">Fashion Store</span>
+                <span className="font-bold text-xl hidden sm:block">
+                  {storeConfig?.store_name || 'Fashion Store'}
+                </span>
               </a>
             </div>
 
@@ -200,6 +252,18 @@ const ClienteLayout = () => {
 
           {/* Contenido Principal */}
           <main className="flex-1 min-w-0">
+            {/* Breadcrumb/Indicador de página actual */}
+            <div className="mb-6">
+              <nav className="flex items-center space-x-2 text-sm">
+                <a href="/" className="text-gray-500 hover:text-primary-600 transition-colors">
+                  Inicio
+                </a>
+                <span className="text-gray-400">/</span>
+                <span className="text-gray-900 dark:text-white font-medium">
+                  {getCurrentPageTitle()}
+                </span>
+              </nav>
+            </div>
             <Outlet />
           </main>
         </div>
