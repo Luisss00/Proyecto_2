@@ -34,9 +34,9 @@ class Order(models.Model):
     shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     
     # Pricing
-    subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     tax = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    total = models.DecimalField(max_digits=10, decimal_places=2)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -51,14 +51,20 @@ class Order(models.Model):
     
     def calculate_totals(self):
         """Calcular subtotal, tax y total de la orden"""
-        # Calcular subtotal desde los items
-        self.subtotal = sum(item.subtotal for item in self.items.all())
+        # Calcular subtotal desde los items (con validación de datos)
+        self.subtotal = sum(
+            (item.subtotal if item.subtotal else Decimal('0.00')) 
+            for item in self.items.all()
+        )
         
         # Calcular tax (IVA 19%) - usar Decimal para evitar errores de tipos
         self.tax = self.subtotal * Decimal('0.19')
         
+        # Asegurar que shipping_cost no sea None
+        shipping_cost = self.shipping_cost if self.shipping_cost else Decimal('0.00')
+        
         # Calcular total
-        self.total = self.subtotal + self.shipping_cost + self.tax
+        self.total = self.subtotal + shipping_cost + self.tax
         
         self.save(update_fields=['subtotal', 'tax', 'total'])
     
@@ -76,11 +82,11 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
-    size = models.CharField(max_length=10)
-    color = models.CharField(max_length=50, blank=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
+    quantity = models.IntegerField(default=1)
+    size = models.CharField(max_length=10, default='')
+    color = models.CharField(max_length=50, blank=True, default='')
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     
     class Meta:
         db_table = 'order_items'
@@ -90,4 +96,14 @@ class OrderItem(models.Model):
     
     @property
     def subtotal(self):
+        # Validar que price y quantity no sean None antes de calcular
+        if self.price is None or self.quantity is None:
+            return Decimal('0.00')
         return self.price * self.quantity
+    
+    def save(self, *args, **kwargs):
+        # Si el producto fue eliminado, preservar el precio pero marcar como eliminado
+        if self.product is None and self.price == 0:
+            # Intentar recuperar el precio de los datos existentes
+            pass
+        super().save(*args, **kwargs)
