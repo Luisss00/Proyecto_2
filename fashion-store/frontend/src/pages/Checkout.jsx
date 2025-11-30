@@ -4,6 +4,7 @@ import { useCart } from '../contexts/CartContext';
 import { orderService } from '../services/api';
 import { CreditCard, MapPin, Phone, FileText } from 'lucide-react';
 import { toast } from 'react-toastify';
+import ProductImage from '../components/ProductImage';
 
 const Checkout = () => {
   const { cart, clearCart } = useCart();
@@ -78,7 +79,7 @@ const Checkout = () => {
           Finalizar Compra
         </h1>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Formulario */}
           <div className="lg:col-span-2 space-y-6">
             {/* Información de Envío */}
@@ -229,22 +230,35 @@ const Checkout = () => {
               </h2>
 
               {/* Productos */}
-              <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
+              <div className="space-y-3 mb-4 max-h-64 lg:max-h-48 overflow-y-auto">
                 {cart.items.map((item) => (
-                  <div key={item.id} className="flex gap-3">
-                    <img
-                      src={item.product.primary_image || 'https://via.placeholder.com/60'}
+                  <div key={item.id} className="flex gap-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                    {/* Imagen */}
+                    <ProductImage
+                      src={item.product.primary_image}
                       alt={item.product.name}
-                      className="w-16 h-16 object-cover rounded"
+                      size="sm"
+                      className="flex-shrink-0"
                     />
-                    <div className="flex-1 text-sm">
-                      <p className="font-semibold text-gray-900 dark:text-white">
+                    
+                    {/* Información */}
+                    <div className="flex-1 min-w-0 text-sm">
+                      <p className="font-semibold text-gray-900 dark:text-white line-clamp-2 leading-tight">
                         {item.product.name}
                       </p>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        Talla: {item.size} | x{item.quantity}
+                      <p className="text-gray-600 dark:text-gray-400 mt-1">
+                        Talla: <span className="font-medium">{item.size}</span>
+                        {item.color && (
+                          <>
+                            {' | '}
+                            Color: <span className="font-medium">{item.color}</span>
+                          </>
+                        )}
+                        <span className="ml-2 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-xs">
+                          x{item.quantity}
+                        </span>
                       </p>
-                      <p className="font-semibold text-primary-600">
+                      <p className="font-semibold text-primary-600 mt-1">
                         {formatPrice(item.subtotal)}
                       </p>
                     </div>

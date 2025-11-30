@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Imágenes</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .image-test { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .image-test img { max-width: 200px; max-height: 200px; margin: 10px; border: 1px solid #ccc; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>🖼️ Test de Carga de Imágenes</h1>
+    
+    <div class="image-test">
+        <h3>Test 1: Imagen relativa via proxy</h3>
+        <img id="img1" src="/media/products/14981729_24859008_600_m2iP2QG.webp" alt="Test 1" onload="showSuccess(1)" onerror="showError(1)">
+        <div id="result1" class="info">Cargando...</div>
+    </div>
+
+    <div class="image-test">
+        <h3>Test 2: Imagen absoluta directo</h3>
+        <img id="img2" src="http://localhost:8000/media/products/14981729_24859008_600_m2iP2QG.webp" alt="Test 2" onload="showSuccess(2)" onerror="showError(2)">
+        <div id="result2" class="info">Cargando...</div>
+    </div>
+
+    <div class="image-test">
+        <h3>Test 3: Imagen desde productos</h3>
+        <img id="img3" src="/media/products/14981729_24859008_600.webp" alt="Test 3" onload="showSuccess(3)" onerror="showError(3)">
+        <div id="result3" class="info">Cargando...</div>
+    </div>
+
+    <div class="image-test">
+        <h3>Test 4: Imagen placeholder</h3>
+        <img id="img4" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNMCAwTDIwIDBMMCAyMFoiIGZpbGw9IiNmOGY5ZmEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=" alt="Placeholder" onload="showSuccess(4)" onerror="showError(4)">
+        <div id="result4" class="info">Cargando...</div>
+    </div>
+
+    <div id="summary" style="margin-top: 30px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
+        <h3>Resumen:</h3>
+        <p id="summary-text">Ejecutando pruebas...</p>
+    </div>
+
+    <script>
+        let successCount = 0;
+        let totalTests = 4;
+
+        function showSuccess(imgNum) {
+            const result = document.getElementById(`result${imgNum}`);
+            result.innerHTML = '<span class="success">✅ Carga exitosa</span>';
+            result.className = 'success';
+            successCount++;
+            updateSummary();
+        }
+
+        function showError(imgNum) {
+            const result = document.getElementById(`result${imgNum}`);
+            result.innerHTML = '<span class="error">❌ Error al cargar</span>';
+            result.className = 'error';
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const summary = document.getElementById('summary-text');
+            if (successCount === totalTests) {
+                summary.innerHTML = `<span class="success">🎉 ¡Todas las pruebas exitosas! (${successCount}/${totalTests})</span><br>
+                <span class="info">✅ El proxy de Vite está funcionando correctamente para las imágenes.</span>`;
+            } else if (successCount > 0) {
+                summary.innerHTML = `<span class="info">⚠️ Pruebas parciales (${successCount}/${totalTests})</span><br>
+                <span class="info">Revisar configuración del proxy y URLs de imágenes.</span>`;
+            } else {
+                summary.innerHTML = `<span class="error">❌ Ninguna imagen se cargó (${successCount}/${totalTests})</span><br>
+                <span class="error">Verificar que el backend esté ejecutándose en http://localhost:8000</span>`;
+            }
+        }
+
+        // Auto-summary after 5 seconds
+        setTimeout(updateSummary, 5000);
+
+        console.log('Iniciando tests de carga de imagenes...');
+        console.log('Frontend URL:', window.location.href);
+        console.log('Intentando cargar imagenes desde /media/...');
+    </script>
+</body>
+</html>

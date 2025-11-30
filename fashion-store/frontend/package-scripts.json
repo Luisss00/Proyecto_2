@@ -1,0 +1,19 @@
+{
+  "name": "scripts-de-pruebas",
+  "description": "Scripts para ejecutar las pruebas de la solución de imágenes optimizadas",
+  "scripts": {
+    "test:images": "node tests/ProductImage.test.js",
+    "test:integration": "node tests/cart-checkout-integration.test.js",
+    "test:all": "npm run test:images && npm run test:integration",
+    "test:watch": "watch 'npm run test:all' tests/",
+    "dev:enhanced": "npm run dev",
+    "build:optimized": "npm run build",
+    "validate:solution": "node -e \"console.log('🔍 Validando solución de imágenes optimizadas...'); require('./tests/ProductImage.test.js'); require('./tests/cart-checkout-integration.test.js');\""
+  },
+  "test-commands": {
+    "description": "Comandos para validar la solución implementada",
+    "unit-tests": "Ejecutar pruebas unitarias del componente ProductImage",
+    "integration-tests": "Ejecutar pruebas de integración de flujos /carrito y /checkout",
+    "full-validation": "Ejecutar todas las pruebas y validaciones"
+  }
+}

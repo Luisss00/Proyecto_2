@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart, Eye } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import FavoriteButton from './FavoriteButton';
+import ProductImage from './ProductImage';
 
 const ProductCard = ({ product, onAddToCart }) => {
   const { isCliente } = useAuth();
@@ -17,11 +18,13 @@ const ProductCard = ({ product, onAddToCart }) => {
   return (
     <div className="product-card group">
       {/* Image */}
-      <div className="relative overflow-hidden h-64 bg-gray-200">
-        <img
-          src={product.primary_image || 'https://via.placeholder.com/400x500?text=No+Image'}
+      <div className="relative overflow-hidden h-64">
+        <ProductImage
+          src={product.primary_image}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+          size="xl"
+          className="w-full h-full group-hover:scale-110 transition-transform duration-300"
+          priority={false}
         />
         
         {product.has_discount && (

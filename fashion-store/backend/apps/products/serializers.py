@@ -24,9 +24,16 @@ class ProductImageSerializer(serializers.ModelSerializer):
     
     def get_image_url(self, obj):
         request = self.context.get('request')
-        if request and obj.image:
-            return request.build_absolute_uri(obj.image.url)
-        return obj.image.url if obj.image else None
+        if obj.image:
+            if request and hasattr(request, 'build_absolute_uri'):
+                try:
+                    return request.build_absolute_uri(obj.image.url)
+                except Exception:
+                    # Fallback si build_absolute_uri falla
+                    return obj.image.url
+            # Fallback: retornar URL relativa si no hay request o falla build_absolute_uri
+            return obj.image.url
+        return None
 
 class ReviewSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -50,8 +57,14 @@ class ProductListSerializer(serializers.ModelSerializer):
         primary = obj.images.filter(is_primary=True).first()
         if primary:
             request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(primary.image.url)
+            if request and hasattr(request, 'build_absolute_uri'):
+                try:
+                    return request.build_absolute_uri(primary.image.url)
+                except Exception:
+                    # Fallback si build_absolute_uri falla
+                    return primary.image.url
+            # Fallback: retornar URL relativa si no hay request o falla build_absolute_uri
+            return primary.image.url
         return None
 
 class ProductDetailSerializer(serializers.ModelSerializer):
